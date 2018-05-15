@@ -547,10 +547,9 @@ int main (void)
         //display_hud();
         display_player();
         
-        delta = millis() - t;
+        //delta = millis() - t;
     }
 }
-
 
 /*
 
