@@ -6,7 +6,7 @@
 DEVICE     = attiny85
 CLOCK      = 8000000
 PROGRAMMER = -b 14400 -c linuxspi -P /dev/spidev0.0
-OBJECTS    = utils.o mage.o     # Add more objects for each .c file here
+OBJECTS    = utils.o beep.o mage.o     # Add more objects for each .c file here
 
 # fuse settings:
 # use http://www.engbedded.com/fusecalc
@@ -59,4 +59,4 @@ disasm:	main.elf
 	avr-objdump -d main.elf
 
 cpp:
-	$(COMPILE) -E utils.c mage.c
+	$(COMPILE) -E utils.c beep.c mage.c
