@@ -5,7 +5,7 @@
 
 DEVICE     = attiny85
 CLOCK      = 8000000
-PROGRAMMER = -b 14400 -c linuxspi -P /dev/spidev0.0
+PROGRAMMER = -c linuxspi -P /dev/spidev0.0
 OBJECTS    = utils.o beep.o oled.o mage.o     # Add more objects for each .c file here
 
 # fuse settings:
@@ -13,7 +13,8 @@ OBJECTS    = utils.o beep.o oled.o mage.o     # Add more objects for each .c fil
 #FUSES      = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m  # 1mhz
 FUSES      = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
 
-AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE = sudo avrdude -b 14400 $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE_FAST = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVICE)
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 # symbolic targets:
@@ -30,6 +31,9 @@ all:	main.hex
 
 flash:	all
 	$(AVRDUDE) -U flash:w:main.hex:i
+
+fast: all
+	$(AVRDUDE_FAST) -U flash:w:main.hex:i
 
 fuse:
 	$(AVRDUDE) $(FUSES)
