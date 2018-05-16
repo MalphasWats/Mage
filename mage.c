@@ -3,7 +3,6 @@
 #include "mage.h"
 #include "oled.h"
 #include "glyphs.h"
-#include "maps.h"
 #include "beep.h"
 
 byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
@@ -11,32 +10,6 @@ unsigned int btn_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 int viewport_col = 0;
 int viewport_row = 0;
-        
-location build_locations()
-{
-    location village = { 
-        .portal_in={15, 14}, 
-        .portal_out={0, 0}, 
-        .map=&VILLAGE[0],
-        .width=32,
-        .height=16,
-        .player={15, 14}, 
-        .return_to=0 
-    };
-    location loc = { 
-        .portal_in={8, 7}, 
-        .portal_out={11, 10}, 
-        .map=&HOUSE[0],
-        .width=8,
-        .height=8,
-        .player={0, 0}, 
-        .return_to=&village
-    };
-    
-    village.portals[0] = &loc;
-    
-    return village;
-}
 
 void display_map(location *loc)
 {
@@ -114,7 +87,9 @@ int main (void)
     
     byte map_dirty = TRUE;
     
-    location current_location = build_locations();
+    build_location_portals();
+    
+    location *current_location = &village;
     
     for(ever)
     {
@@ -123,7 +98,7 @@ int main (void)
         if (map_dirty)
         {
             //display_map(&MAP1[0], MAP_1_COLS, MAP_1_ROWS);
-            display_map(&current_location);
+            display_map(current_location);
             map_dirty = FALSE;
         }
         
@@ -158,9 +133,9 @@ int main (void)
         
         if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR && btn_timers[0] == 0)
         {
-            if (!collide_at(&current_location, current_location.player.x-1, current_location.player.y))
+            if (!collide_at(current_location, current_location->player.x-1, current_location->player.y))
             {
-                current_location.player.x -= 1;
+                current_location->player.x -= 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -169,9 +144,9 @@ int main (void)
         }
         else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR && btn_timers[1] == 0)
         {
-            if (!collide_at(&current_location, current_location.player.x+1, current_location.player.y))
+            if (!collide_at(current_location, current_location->player.x+1, current_location->player.y))
             {
-                current_location.player.x += 1;
+                current_location->player.x += 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -179,9 +154,9 @@ int main (void)
         }
         else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR && btn_timers[2] == 0)
         {
-            if (!collide_at(&current_location, current_location.player.x, current_location.player.y-1))
+            if (!collide_at(current_location, current_location->player.x, current_location->player.y-1))
             {
-                current_location.player.y -= 1;
+                current_location->player.y -= 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -190,9 +165,9 @@ int main (void)
         }
         else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR && btn_timers[3] == 0)
         {
-            if (!collide_at(&current_location, current_location.player.x, current_location.player.y+1))
+            if (!collide_at(current_location, current_location->player.x, current_location->player.y+1))
             {
-                current_location.player.y += 1;
+                current_location->player.y += 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -201,9 +176,33 @@ int main (void)
         }
         else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR && btn_timers[4] == 0)
         {
-            map_dirty = TRUE;
-            
-            crap_beep(SND, _A9, 5);
+            if (current_location->player.x == current_location->portal_out.x && 
+                current_location->player.y == current_location->portal_out.y &&
+                current_location->return_to != 0)
+            {
+                current_location = current_location->return_to;
+                
+                map_dirty = TRUE;
+                crap_beep(SND, _A9, 5);
+            }
+            else 
+            {
+                for (byte i=0 ; i<MAX_PORTALS ; i++)
+                {
+                    if (current_location->player.x == current_location->portals[i]->portal_in.x && 
+                        current_location->player.y == current_location->portals[i]->portal_in.y)
+                    {
+                        current_location = current_location->portals[i];
+                        current_location->player.x = current_location->portal_out.x;
+                        current_location->player.y = current_location->portal_out.y;
+                        
+                        map_dirty = TRUE;
+                        crap_beep(SND, _A9, 5);
+                        
+                        break;
+                    }
+                }
+            }
             
             btn_timers[4] = t;
         }
@@ -249,18 +248,18 @@ int main (void)
         if (t - btn_timers[7] > BTN_DELAY)
             btn_timers[7] = 0;
         
-        if (current_location.player.x < 0)
-            current_location.player.x = 0;
-        if (current_location.player.x > current_location.width-1)
-            current_location.player.x = current_location.width-1;
+        if (current_location->player.x < 0)
+            current_location->player.x = 0;
+        if (current_location->player.x > current_location->width-1)
+            current_location->player.x = current_location->width-1;
         
-        if (current_location.player.y < 0)
-            current_location.player.y = 0;
-        if (current_location.player.y > current_location.height-1)
-            current_location.player.y = current_location.height-1;
+        if (current_location->player.y < 0)
+            current_location->player.y = 0;
+        if (current_location->player.y > current_location->height-1)
+            current_location->player.y = current_location->height-1;
         
         //display_hud();
-        display_player(&current_location);
+        display_player(current_location);
         
         //delta = millis() - t;
     }

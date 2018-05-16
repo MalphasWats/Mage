@@ -6,6 +6,7 @@
 #include <avr/pgmspace.h>
 
 #include "utils.h"
+#include "maps.h"
 
 #define SPLASH_DELAY    1500
 #define BTN_DELAY       180
@@ -21,27 +22,6 @@
 #define _D      1021
 
 #define ADC_VAR 2
-
-typedef struct point {
-    int x;
-    int y;
-} point;
-
-
-typedef struct location {
-    const point portal_in;
-    const point portal_out;
-    
-    const byte *map;
-    const byte width;
-    const byte height;
-    
-    struct location *portals[8];
-    
-    point player;
-    
-    struct location *return_to;
-} location; 
 
         
 /*  0000  0      1000  8
@@ -69,7 +49,7 @@ static const byte LOGO[] PROGMEM = {
 };
 
 
-location build_locations( void );
+//location build_locations( void );
 void display_map(location *loc);
 void display_player(location *loc);
 
