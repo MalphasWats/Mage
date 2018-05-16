@@ -1,6 +1,8 @@
 #ifndef OLED_H
 # define OLED_H
 
+#include <avr/pgmspace.h>
+
 #include "utils.h"
 
 #define MSBFIRST 0
@@ -19,7 +21,7 @@
 #define SCREEN_COLUMNS 16
 #define SCREEN_ROWS    8
 
-static const byte BLANK[] = {0, 0, 0, 0, 0, 0, 0, 0};
+static const byte BLANK[] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0};
 
 void shift_out(byte val, byte order);
 

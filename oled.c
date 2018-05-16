@@ -1,5 +1,4 @@
 #include <avr/io.h>
-#include <avr/pgmspace.h>
 
 #include "oled.h"
 
