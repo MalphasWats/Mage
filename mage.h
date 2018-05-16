@@ -7,24 +7,6 @@
 
 #include "utils.h"
 
-#define MSBFIRST 0
-#define LSBFIRST 1
-
-#define SCL   1
-#define SDA   2
-#define DC    3
-
-#define SND   0
-
-#define CMD     LOW
-#define DATA    HIGH
-
-#define WIDTH   128
-#define HEIGHT  64
-
-#define COLUMNS 16
-#define ROWS    8
-
 #define SPLASH_DELAY    1500
 #define BTN_DELAY       180
 
@@ -39,6 +21,27 @@
 #define _D      1021
 
 #define ADC_VAR 2
+
+typedef struct point {
+    int x;
+    int y;
+} point;
+
+
+typedef struct location {
+    const point portal_in;
+    const point portal_out;
+    
+    const byte *map;
+    const byte width;
+    const byte height;
+    
+    struct location *portals[8];
+    
+    point player;
+    
+    struct location *return_to;
+} location; 
 
         
 /*  0000  0      1000  8
@@ -65,19 +68,11 @@ static const byte LOGO[] PROGMEM = {
     0x00, 0x00, 0x7C, 0xFE, 0x01, 0x83, 0x83, 0x83,     0x83, 0x03, 0x03, 0x03, 0x03, 0x02, 0x00, 0x00,     // E
 };
 
-void shift_out(byte val, byte order);
-void shift_out_block(const byte *block);
 
-void send_command(byte command);
-void initialise_oled(void);
-void clear_display(void);
-void display_off(void);
-void display_on(void);
+location build_locations( void );
+void display_map(location *loc);
+void display_player(location *loc);
 
-void display_image(const byte *img, unsigned int col, unsigned int row, unsigned int width, unsigned int height);
-void display_map(const byte *m, int map_cols, int map_rows);
-void display_player(void);
-
-byte collide_at(int row, int col);
+byte collide_at(location *loc, int row, int col);
 
 #endif

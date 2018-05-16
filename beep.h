@@ -1,6 +1,8 @@
 #ifndef BEEP_H
 # define BEEP_H
 
+#define SND   0
+
 // http://www.soundoctor.com/freq.htm
 
 //      NOTE    PERIOD   FREQ.  Note        

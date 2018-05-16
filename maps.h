@@ -17,10 +17,10 @@
 };*/
 
 
-#define MAP_1_COLS 32
-#define MAP_1_ROWS 16
+//#define MAP_1_COLS 32
+//#define MAP_1_ROWS 16
     
-static const byte MAP1[] PROGMEM = {
+static const byte VILLAGE[] PROGMEM = {
 
 	139, 139, 139, 139, 139, 139, 139, 139, 143, 143, 143, 143, 143, 143, 143, 143, 
 	143, 143, 143, 143, 139, 139, 139,   0,   0,   0,   0,   0, 132,   0,   0,   0, 
@@ -72,8 +72,8 @@ static const byte MAP1[] PROGMEM = {
 
 };
 
-#define HOUSE_COLS 8
-#define HOUSE_ROWS 8
+//#define HOUSE_COLS 8
+//#define HOUSE_ROWS 8
 
 static const byte HOUSE[] PROGMEM = {
 	175, 181, 181, 181, 181, 181, 181, 175, 

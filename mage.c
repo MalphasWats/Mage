@@ -1,307 +1,69 @@
 #include <avr/io.h>
 
 #include "mage.h"
+#include "oled.h"
 #include "glyphs.h"
 #include "maps.h"
 #include "beep.h"
 
 byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
 unsigned int btn_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-        
-int x = 3;
-int y = 3;
 
 int viewport_col = 0;
 int viewport_row = 0;
-
-
-void send_command(byte command)
+        
+location build_locations()
 {
-    for (byte i = 0; i < 8; i++)  
-    {
-        if ( command & (1 << (7 - i)) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL;      // HIGH
-        PORTB &= ~(1 << SCL);   // LOW
-    }
-}
-
-void shift_out(byte val, byte order)
-{
-    byte b;
-    for (byte i = 0; i < 8; i++)  
-    {
-        if (order == LSBFIRST)
-        {
-            b = val & (1 << i);
-        }
-        else
-        {
-            b = val & (1 << (7 - i));
-        }
-        
-        if ( b )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-    }
-}
-
-/* Un-rolling the loop makes this much faster */
-void shift_out_block(const byte *block)
-{
-    byte b;
-    for (byte i = 0; i < 8; i++)  
-    {
-        b = pgm_read_byte(block+i);
-        
-        if ( b & (1 << 0) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 1) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 2) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 3) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 4) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 5) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 6) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-        
-        if ( b & (1 << 7) )
-        {
-            PORTB |= 1 << SDA;
-        }
-        else
-        {
-            PORTB &= ~(1 << SDA);
-        }
-        
-        PORTB |= 1 << SCL; // HIGH
-        PORTB &= ~(1 << SCL); // LOW
-    }
-}
-
-
-void initialise_oled(void)
-{
-    PORTB &= ~(1 << DC);        // LOW (Command Mode)
-    send_command(0xAE);         // DISPLAYOFF
+    location village = { 
+        .portal_in={15, 14}, 
+        .portal_out={0, 0}, 
+        .map=&VILLAGE[0],
+        .width=32,
+        .height=16,
+        .player={15, 14}, 
+        .return_to=0 
+    };
+    location loc = { 
+        .portal_in={4, 7}, 
+        .portal_out={11, 10}, 
+        .map=&HOUSE[0],
+        .width=8,
+        .height=8,
+        .player={0, 0}, 
+        .return_to=&village
+    };
     
-    send_command(0xD5);         // SETDISPLAYCLOCKDIV
-    send_command(0x80);         // the suggested ratio 0x80
-
-    send_command(0xA8 );        // SSD1306_SETMULTIPLEX
-    send_command(HEIGHT - 1);
-
-    send_command(0xD3 );        // SETDISPLAYOFFSET
-    send_command(0x0);          // no offset
-    send_command(0x40  | 0x0);  // SETSTARTLINE line #0
-  
-    send_command(0x8D);        // CHARGEPUMP
-    send_command(0x14);         // Not External Vcc
-  
-    send_command(0x20 );        // MEMORYMODE
-    send_command(0x00);         // 0x0 act like ks0108
-    send_command(0xA0  | 0x1);  // SEGREMAP
-    send_command(0xC8 );        // COMSCANDEC
-
-
-    send_command(0xDA);        // SETCOMPINS
-    send_command(0x12);
-  
-    send_command(0x81 );        // SETCONTRAST
-    send_command(0xCF);         // Not External Vcc
-
-
-    send_command(0xD9 );        // SETPRECHARGE
-    send_command(0xF1);         // Not External Vcc
-  
-    send_command(0xDB);        // SETVCOMDETECT
-    send_command(0x40);
-  
-    send_command(0xA4 );        // DISPLAYALLON_RESUME
-    send_command(0xA6 );        // NORMALDISPLAY
-
-    send_command(0x2E );        // DEACTIVATE_SCROLL
-
-    send_command(0xAF);         // DISPLAYON
+    village.portals[0] = &loc;
+    
+    return village;
 }
 
-void clear_display(void)
+void display_map(location *loc)
 {
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-    
-    for (byte i=0 ; i<128 ; i++)
-    {
-        shift_out_block(&GLYPHS[0]);
-    }
-}
-
-void display_off(void)
-{
-    PORTB &= ~(1 << DC);    // LOW
-    send_command(0xAE);     // DISPLAYOFF
-}
-
-void display_on(void)
-{
-    PORTB &= ~(1 << DC);    // LOW
-    send_command(0xAF);     // DISPLAYON
-}
-
-void display_image(const byte *img, unsigned int col, unsigned int row, unsigned int width, unsigned int height)
-{
-    for (int h=0 ; h<height ; h++)
-    {
-        PORTB &= ~(1 << DC);        // LOW
-        
-        send_command(0x21);         //  COLUMNADDR
-        send_command(col*8);            // Column start address (0 = reset)
-        send_command(WIDTH - 1);    // Column end address (127 = reset)
-        
-        send_command(0x22);         //  PAGEADDR
-        send_command(row+h);        // Page start address (0 = reset)
-        send_command(7);            // Page end address // 64 lines
-        
-        PORTB |= 1 << DC;           // HIGH
-    
-        for (int w=0 ; w<width ; w++)
-            shift_out_block(&img[(width * h + w)*8]);
-    }
-    
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-}
-
-void display_map(const byte *m, int map_cols, int map_rows)
-{
-    viewport_col = x-COLUMNS/2;
-    viewport_row = y-ROWS/2;
+    viewport_col = loc->player.x-SCREEN_COLUMNS/2;
+    viewport_row = loc->player.y-SCREEN_ROWS/2;
     
     if (viewport_col < 0)
         viewport_col = 0;
     if (viewport_row < 0)
         viewport_row = 0;
     
-    if (viewport_col + COLUMNS > map_cols)
-        viewport_col = map_cols - COLUMNS;
-    if (viewport_row + ROWS > map_rows)
-        viewport_row = map_rows - ROWS;
+    if (viewport_col + SCREEN_COLUMNS > loc->width)
+        viewport_col = loc->width - SCREEN_COLUMNS;
+    if (viewport_row + SCREEN_ROWS > loc->height)
+        viewport_row = loc->height - SCREEN_ROWS;
     
-    int col, row;
+    int col, row, i;
     
-    for (row=0 ; row<ROWS ; row++)
+    for (row=0 ; row<SCREEN_ROWS ; row++)
     {
-        for (col=0 ; col<COLUMNS ; col++)
+        for (col=0 ; col<SCREEN_COLUMNS ; col++)
         {
-            int i = map_cols * (viewport_row+row) + (viewport_col+col);
-            if (i > map_cols * map_rows)
+            i = loc->width * (viewport_row+row) + (viewport_col+col);
+            if (i > loc->width * loc->height)
                 shift_out_block(&GLYPHS[0]);
             else
-                shift_out_block(&GLYPHS[pgm_read_byte(&m[ i ])*8]);
+                shift_out_block(&GLYPHS[pgm_read_byte(&loc->map[ i ])*8]);
         }
     }
     
@@ -309,73 +71,23 @@ void display_map(const byte *m, int map_cols, int map_rows)
     // https://www.ccsinfo.com/forum/viewtopic.php?p=217165
 }
 
-void display_player(void)
+void display_player(location *loc)
 {
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command((x-viewport_col)*8);          // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command((y-viewport_row));            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-    
-    shift_out_block(&GLYPHS[PLAYER_OFFSET*8]);
-    
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
+    display_block(&GLYPHS[PLAYER_OFFSET*8], (loc->player.x-viewport_col)*8, (loc->player.y-viewport_row));
 }
 
-/*void display_hud(void)
-{
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(10*8);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
 
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-    
-    shift_out_block(&GLYPHS[(HUD[0])*8]);
-    shift_out_block(&GLYPHS[(HUD[1]+DIGIT_OFFSET)*8]);
-    shift_out_block(&GLYPHS[(HUD[2]+DIGIT_OFFSET)*8]);
-    shift_out_block(&GLYPHS[(HUD[3]+DIGIT_OFFSET)*8]);
-    
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
 
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-}*/
-
-byte collide_at(int col, int row)
+byte collide_at(location *loc, int col, int row)
 {
     // odd collide, even passable, TODO: above ~128
-    return pgm_read_byte(&MAP1[ MAP_1_COLS * row + col ]) % 2;
+    return pgm_read_byte(&loc->map[ loc->width * row + col ]) % 2;
 }
 
 int main (void) 
 {
     // Setup
-    DDRB = (1<<SDA) | (1<<DC) | (1<<SCL) | (1<<SND); // Configure Outputs
+    //DDRB = (1<<SDA) | (1<<DC) | (1<<SCL) | (1<<SND); // Configure Outputs
     
     init_timer();
     
@@ -392,7 +104,7 @@ int main (void)
     delay_ms(SPLASH_DELAY);
     
     PORTB &= ~(1 << DC);        // LOW
-    send_command(0xA7 );        // INVERTEDDISPLAY
+    send_command(0xA7);        // INVERTEDDISPLAY
     PORTB |= 1 << DC;           // HIGH
     
     unsigned int t;
@@ -402,13 +114,16 @@ int main (void)
     
     byte map_dirty = TRUE;
     
+    location current_location = build_locations();
+    
     for(ever)
     {
         t = millis();
         
         if (map_dirty)
         {
-            display_map(&MAP1[0], MAP_1_COLS, MAP_1_ROWS);
+            //display_map(&MAP1[0], MAP_1_COLS, MAP_1_ROWS);
+            display_map(&current_location);
             map_dirty = FALSE;
         }
         
@@ -443,9 +158,9 @@ int main (void)
         
         if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR && btn_timers[0] == 0)
         {
-            if (!collide_at(x-1, y))
+            if (!collide_at(&current_location, current_location.player.x-1, current_location.player.y))
             {
-                x -= 1;
+                current_location.player.x -= 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -454,9 +169,9 @@ int main (void)
         }
         else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR && btn_timers[1] == 0)
         {
-            if (!collide_at(x+1, y))
+            if (!collide_at(&current_location, current_location.player.x+1, current_location.player.y))
             {
-                x += 1;
+                current_location.player.x += 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -464,9 +179,9 @@ int main (void)
         }
         else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR && btn_timers[2] == 0)
         {
-            if (!collide_at(x, y-1))
+            if (!collide_at(&current_location, current_location.player.x, current_location.player.y-1))
             {
-                y -= 1;
+                current_location.player.y -= 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -475,9 +190,9 @@ int main (void)
         }
         else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR && btn_timers[3] == 0)
         {
-            if (!collide_at(x, y+1))
+            if (!collide_at(&current_location, current_location.player.x, current_location.player.y+1))
             {
-                y += 1;
+                current_location.player.y += 1;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
@@ -534,18 +249,18 @@ int main (void)
         if (t - btn_timers[7] > BTN_DELAY)
             btn_timers[7] = 0;
         
-        if (x < 0)
-            x = 0;
-        if (x > MAP_1_COLS-1)
-            x = MAP_1_COLS-1;
+        if (current_location.player.x < 0)
+            current_location.player.x = 0;
+        if (current_location.player.x > current_location.width-1)
+            current_location.player.x = current_location.width-1;
         
-        if (y < 0)
-            y = 0;
-        if (y > MAP_1_ROWS-1)
-            y = MAP_1_ROWS-1;
+        if (current_location.player.y < 0)
+            current_location.player.y = 0;
+        if (current_location.player.y > current_location.height-1)
+            current_location.player.y = current_location.height-1;
         
         //display_hud();
-        display_player();
+        display_player(&current_location);
         
         //delta = millis() - t;
     }

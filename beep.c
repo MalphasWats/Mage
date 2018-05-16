@@ -11,6 +11,8 @@
 
 void crap_beep(unsigned int pin, unsigned int note, unsigned int dur)
 {
+    DDRB |= (1<<SND);
+    
     unsigned long ts = millis();
     while (millis() < ts + dur)
     {
