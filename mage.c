@@ -24,7 +24,7 @@ location build_locations()
         .return_to=0 
     };
     location loc = { 
-        .portal_in={4, 7}, 
+        .portal_in={8, 7}, 
         .portal_out={11, 10}, 
         .map=&HOUSE[0],
         .width=8,
