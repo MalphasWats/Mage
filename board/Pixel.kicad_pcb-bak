@@ -1760,8 +1760,9 @@
   (gr_line (start 125 40) (end 225 40) (angle 90) (layer Eco1.User) (width 0.2))
 
   (segment (start 171.25 68) (end 171.25 82.5) (width 0.25) (layer B.Cu) (net 3))
-  (segment (start 198.25 38.88) (end 190.87 38.88) (width 0.25) (layer F.Cu) (net 6) (status 400000))
   (segment (start 190.87 38.88) (end 190.75 39) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AFD4A2F))
+  (segment (start 198.25 38.88) (end 190.87 38.88) (width 0.25) (layer F.Cu) (net 6))
+  (segment (start 190.75 39) (end 182.5 39) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AFD4A32))
   (segment (start 200 50.84) (end 197.84 50.84) (width 0.25) (layer F.Cu) (net 6))
   (segment (start 192 45) (end 192 41) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE09226))
   (segment (start 197.84 50.84) (end 192 45) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE09220))
@@ -1770,7 +1771,6 @@
   (segment (start 192 41) (end 192 40) (width 0.25) (layer F.Cu) (net 6))
   (segment (start 192 40) (end 191 39) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE09202))
   (segment (start 191 39) (end 190.75 39) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE09210))
-  (segment (start 190.75 39) (end 182.5 39) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AFD4A32))
   (segment (start 177.49 44.01) (end 177.49 52.5) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE090C0))
   (segment (start 182.5 39) (end 177.49 44.01) (width 0.25) (layer F.Cu) (net 6) (tstamp 5AE090B5))
   (segment (start 159.5 40) (end 159.5 46.5) (width 0.25) (layer F.Cu) (net 7))
@@ -1817,7 +1817,7 @@
   (segment (start 215.25 54.25) (end 220.54 48.96) (width 0.25) (layer F.Cu) (net 23) (tstamp 5AE1E786))
   (segment (start 180 54.25) (end 215.25 54.25) (width 0.25) (layer F.Cu) (net 23) (tstamp 5AE1E785))
   (segment (start 179.99 54.24) (end 180 54.25) (width 0.25) (layer F.Cu) (net 23) (tstamp 5AE1E783))
-  (segment (start 204 43.5) (end 201.25 43.5) (width 0.25) (layer F.Cu) (net 24) (status 400000))
-  (segment (start 201.25 43.5) (end 198.25 46.5) (width 0.25) (layer F.Cu) (net 24) (tstamp 5AFD4A2B) (status 800000))
+  (segment (start 201.25 43.5) (end 198.25 46.5) (width 0.25) (layer F.Cu) (net 24) (tstamp 5AFD4A2B))
+  (segment (start 204 43.5) (end 201.25 43.5) (width 0.25) (layer F.Cu) (net 24))
 
 )
