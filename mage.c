@@ -33,9 +33,9 @@ void display_map(location *loc)
         for (col=0 ; col<SCREEN_COLUMNS ; col++)
         {
             i = loc->width * (viewport_row+row) + (viewport_col+col);
-            if (i > loc->width * loc->height)
-                shift_out_block(&GLYPHS[0]);
-            else
+            //if (i > loc->width * loc->height)
+            //    shift_out_block(&GLYPHS[0]);  // Don't think this can happen any more.
+            //else
                 shift_out_block(&GLYPHS[pgm_read_byte(&loc->map[ i ])*8]);
         }
     }
@@ -53,7 +53,7 @@ void display_player(location *loc)
 
 byte collide_at(location *loc, int col, int row)
 {
-    // odd collide, even passable, TODO: above ~128
+    // odd collide, even passable, TODO: above 128
     return pgm_read_byte(&loc->map[ loc->width * row + col ]) % 2;
 }
 
@@ -63,7 +63,6 @@ int main (void)
     //DDRB = (1<<SDA) | (1<<DC) | (1<<SCL) | (1<<SND); // Configure Outputs
     
     init_timer();
-    
     initialise_oled();
     clear_display();
     
@@ -97,7 +96,6 @@ int main (void)
         
         if (map_dirty)
         {
-            //display_map(&MAP1[0], MAP_1_COLS, MAP_1_ROWS);
             display_map(current_location);
             map_dirty = FALSE;
         }
@@ -264,20 +262,3 @@ int main (void)
         //delta = millis() - t;
     }
 }
-
-/*
-
-avr-gcc -c -mmcu=atmega16 file1.c -o file1.o
-avr-gcc -c -mmcu=atmega16 file2.c -o file2.o
-avr-gcc -c -mmcu=atmega16 file3.c -o file3.o
-etc.
-
-which separately compiles (-c) three different files to generate ELF object files. Then you join those together using the linker:
-
-avr-gcc -mmcu=atmega16 file1.o file2.o file3.o -o proj.elf
-
-The absence of -c means "don't just compile but link together the inputs". So cross-references in the files will be linked to each other and this will finally write a fully linked copy of the code to the proj.elf output file. Normally you then want to extract .text and .data to make a .hex from this with:
-
-avr-objcopy -O ihex -j .text -j .data proj.elf proj.hex
-
-*/
