@@ -353,7 +353,7 @@ F 1 "D_ALT" H 3400 750 50  0001 C CNN
 F 2 "Diodes_THT:D_A-405_P7.62mm_Horizontal" H 3400 850 50  0001 C CNN
 F 3 "" H 3400 850 50  0001 C CNN
 	1    3400 850 
-	-1   0    0    1   
+	1    0    0    -1  
 $EndComp
 $Comp
 L SW_Push SW0
@@ -380,12 +380,12 @@ $EndComp
 $Comp
 L +5V #PWR01
 U 1 1 5ADF218B
-P 2550 2450
-F 0 "#PWR01" H 2550 2300 50  0001 C CNN
-F 1 "+5V" H 2550 2590 50  0000 C CNN
-F 2 "" H 2550 2450 50  0001 C CNN
-F 3 "" H 2550 2450 50  0001 C CNN
-	1    2550 2450
+P 1800 2450
+F 0 "#PWR01" H 1800 2300 50  0001 C CNN
+F 1 "+5V" H 1800 2590 50  0000 C CNN
+F 2 "" H 1800 2450 50  0001 C CNN
+F 3 "" H 1800 2450 50  0001 C CNN
+	1    1800 2450
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -520,10 +520,6 @@ F 3 "" H 2450 1400 50  0001 C CNN
 	1    2450 1400
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	1000 2350 1800 2350
-Wire Wire Line
-	1800 2350 1800 2450
 Wire Wire Line
 	3350 1800 3350 1950
 Wire Wire Line
@@ -677,7 +673,7 @@ $EndComp
 Wire Wire Line
 	1300 3100 1500 3100
 Wire Wire Line
-	1000 3100 1000 2350
+	1000 2200 1000 3100
 Wire Wire Line
 	1050 2050 900  2050
 Wire Wire Line
@@ -776,4 +772,8 @@ F 3 "" H 4650 900 50  0001 C CNN
 	1    4650 900 
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	2550 2450 2550 2200
+Wire Wire Line
+	2550 2200 1000 2200
 $EndSCHEMATC

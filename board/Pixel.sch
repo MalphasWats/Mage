@@ -353,7 +353,7 @@ F 1 "D_ALT" H 3400 750 50  0001 C CNN
 F 2 "Diodes_THT:D_A-405_P7.62mm_Horizontal" H 3400 850 50  0001 C CNN
 F 3 "" H 3400 850 50  0001 C CNN
 	1    3400 850 
-	-1   0    0    1   
+	1    0    0    -1  
 $EndComp
 $Comp
 L SW_Push SW0
@@ -578,10 +578,6 @@ Wire Wire Line
 	3350 1300 3350 1350
 Connection ~ 3100 1300
 Wire Wire Line
-	3550 850  4900 850 
-Wire Wire Line
-	3250 850  3100 850 
-Wire Wire Line
 	3100 850  3100 1300
 Wire Wire Line
 	2450 1400 2450 1300
@@ -776,4 +772,8 @@ Wire Wire Line
 	2550 2450 2550 2200
 Wire Wire Line
 	2550 2200 1000 2200
+Wire Wire Line
+	3100 850  3250 850 
+Wire Wire Line
+	3550 850  4900 850 
 $EndSCHEMATC
