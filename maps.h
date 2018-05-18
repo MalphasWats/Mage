@@ -4,12 +4,6 @@
 #include "utils.h"
 
 #define MAX_PORTALS 8
-    
-typedef struct point {
-    int x;
-    int y;
-} point;
-
 
 typedef struct location {
     const point portal_in;

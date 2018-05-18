@@ -16,6 +16,11 @@
 
 typedef unsigned char byte;
 
+typedef struct point {
+    int x;
+    int y;
+} point;
+
 void delay_ms( int ms );
 void delay_us( int us );
 
