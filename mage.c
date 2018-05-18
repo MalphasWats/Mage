@@ -28,12 +28,68 @@ void display_map(location *loc)
     // https://www.ccsinfo.com/forum/viewtopic.php?p=217165
 }
 
-void display_player(mob_type *p)
+void display_player(mob_type *player)
 {
-    display_block(&GLYPHS[p->glyph], (p->position.x-viewport_col)*8, (p->position.y-viewport_row));
+    display_block(&GLYPHS[player->glyph], (player->position.x-viewport_col)*8, (player->position.y-viewport_row));
 }
 
+mob_type *update_mobs(location *loc, mob_type *player)
+{
+    for(int i=0 ; i<MAX_MOBS ; i++)
+    {
+        if (loc->mobs[i])
+        {
+            if (loc->mobs[i]->position.x == player->position.x && 
+                loc->mobs[i]->position.y == player->position.y)
+            {
+                return loc->mobs[i];
+            }
+            // update the mob
+        }
+    }
+    return 0;
+}
 
+void display_mobs(location *loc)
+{
+    for(int i=0 ; i<MAX_MOBS ; i++)
+    {
+        if (loc->mobs[i])
+        {
+            //Need to check that it's actually within the viewport
+            display_block(&GLYPHS[loc->mobs[i]->glyph], (loc->mobs[i]->position.x-viewport_col)*8, (loc->mobs[i]->position.y-viewport_row));
+        }
+    }
+}
+
+void battle_mode(mob_type *player, mob_type *opponent)
+{
+    //clear screen
+    clear_display();
+    
+    crap_beep(SND, _A4, 20);
+    delay_ms(10);
+    crap_beep(SND, _A5, 35);
+    delay_ms(30);
+    crap_beep(SND, _C4, 20);
+    delay_ms(10);
+    crap_beep(SND, _C5, 35);
+    
+    
+    //draw ui
+    
+    //draw opponent
+    
+    //start countdown
+    
+    //choose opponent action(s)
+    
+    //await player actions
+    
+    //resolve combat
+    
+    //update ui
+}
 
 byte collide_at(location *loc, int col, int row)
 {
@@ -71,14 +127,26 @@ int main (void)
     byte map_dirty = TRUE;
     
     build_location_portals();
-    
     location *current_location = &village;
+    
+    mob_type mob = {
+        .glyph = (PLAYER_OFFSET+7)*8,
+        .position = {.x=16, .y=13},
+    
+        .hitpoints = 3,
+        .attack_damage = 1,
+        .num_attacks = 1,
+    
+        .dead = FALSE,
+    };
+    
+    current_location->mobs[0] = &mob;
     
     mob_type player = {
         .glyph = PLAYER_OFFSET*8,
         .position = current_location->portal_in,
     
-        .hitpoints = 10,    
+        .hitpoints = 10,
         .attack_damage = 2,
         .num_attacks = 2,
     
@@ -239,6 +307,18 @@ int main (void)
         
         //display_hud();
         display_player(&player);
+        
+        mob_type *opponent = update_mobs(current_location, &player);
+        
+        if (opponent != 0)
+        {
+            crap_beep(SND, _A4, 20);
+            delay_ms(10);
+            crap_beep(SND, _A5, 35);
+            battle_mode(&player, opponent);
+        }
+        
+        display_mobs(current_location);
         
         //delta = millis() - t;
     }

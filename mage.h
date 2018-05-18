@@ -50,8 +50,10 @@ static const byte LOGO[] PROGMEM = {
 };
 
 void display_map(location *loc);
-void display_player(mob_type *p);
-
+void display_player(mob_type *player);
+mob_type *update_mobs(location *loc, mob_type *player);
+void display_mobs(location *loc);
+void battle_mode(mob_type *player, mob_type *opponent);
 byte collide_at(location *loc, int row, int col);
 
 #endif

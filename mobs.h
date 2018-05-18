@@ -3,6 +3,8 @@
 
 #include "utils.h"
 
+#define MAX_MOBS 8
+
 typedef struct mob_type {
     int glyph;
     point position;

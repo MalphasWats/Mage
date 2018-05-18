@@ -2,6 +2,7 @@
 # define MAPS_H
 
 #include "utils.h"
+#include "mobs.h"
 
 #define MAX_PORTALS 8
 
@@ -14,6 +15,7 @@ typedef struct location {
     const byte height;
     
     struct location *portals[MAX_PORTALS];
+    mob_type *mobs[MAX_MOBS];
     
     struct location *return_to;
 } location; 
