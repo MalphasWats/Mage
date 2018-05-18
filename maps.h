@@ -15,8 +15,6 @@ typedef struct location {
     
     struct location *portals[MAX_PORTALS];
     
-    point player;
-    
     struct location *return_to;
 } location; 
     
@@ -78,7 +76,6 @@ location village = {
     .map=&VILLAGE[0],
     .width=32,
     .height=16,
-    .player={15, 14}, 
     .return_to=0 
 };
 
@@ -100,7 +97,6 @@ location house = {
     .map=&HOUSE[0],
     .width=16,
     .height=8,
-    .player={0, 0}, 
     .return_to=&village
 };
 

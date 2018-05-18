@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "maps.h"
+#include "mobs.h"
 
 #define SPLASH_DELAY    1500
 #define BTN_DELAY       180
@@ -49,7 +50,7 @@ static const byte LOGO[] PROGMEM = {
 };
 
 void display_map(location *loc);
-void display_player(location *loc);
+void display_player(mob_type *p);
 
 byte collide_at(location *loc, int row, int col);
 

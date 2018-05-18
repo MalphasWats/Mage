@@ -293,6 +293,34 @@ void display_block(const byte *block, int col, int row)
 
 /*void display_hud(void)
 {
+    
+    if (hud_timer == 0)
+        {
+            if (btn_val > 50)
+            {
+                delta = btn_val;
+                for (byte d=0 ; d<4 ; d++)    // Button Mapping
+                {
+                    HUD[3-d] = (delta % 10);
+                    delta = delta / 10;
+                }
+            }
+            else 
+            {
+                for (byte d=0 ; d<3 ; d++)      // Frame Time
+                {
+                    HUD[3-d] = (delta % 10);
+                    delta = delta / 10;
+                }
+                HUD[0] = 0;
+            }
+            
+            hud_timer = t;
+        }
+        if (t - hud_timer > 100)
+            hud_timer = 0;
+        
+        
     PORTB &= ~(1 << DC);        // LOW
     send_command(0x21);         //  COLUMNADDR
     send_command(10*8);            // Column start address (0 = reset)
