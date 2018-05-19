@@ -4,6 +4,7 @@
 #
 
 DEVICE     = attiny85
+DEVDUDE    = t85
 CLOCK      = 8000000
 PROGRAMMER = -c linuxspi -P /dev/spidev0.0
 OBJECTS    = utils.o beep.o oled.o mage.o     # Add more objects for each .c file here
@@ -13,8 +14,8 @@ OBJECTS    = utils.o beep.o oled.o mage.o     # Add more objects for each .c fil
 #FUSES      = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m  # 1mhz
 FUSES      = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
 
-AVRDUDE = sudo avrdude -b 14400 $(PROGRAMMER) -p $(DEVICE)
-AVRDUDE_FAST = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVICE)
+AVRDUDE = sudo avrdude -b 14400 $(PROGRAMMER) -p $(DEVDUDE)
+AVRDUDE_FAST = sudo avrdude -b 200000 $(PROGRAMMER) -p $(DEVDUDE)
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 # symbolic targets:
