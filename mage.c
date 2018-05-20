@@ -222,8 +222,8 @@ int main (void)
                 player.position.y == current_location->portal_out.y &&
                 current_location->return_to != 0)
             {
-                current_location = current_location->return_to;
                 player.position = current_location->portal_in;
+                current_location = current_location->return_to;
                 map_dirty = TRUE;
                 crap_beep(SND, _A9, 5);
             }
