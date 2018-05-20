@@ -17,20 +17,29 @@ void display_map(location *loc)
     
     for (row=0 ; row<SCREEN_ROWS ; row++)
     {
+        set_display_row(row);
         for (col=0 ; col<SCREEN_COLUMNS ; col++)
         {
             i = loc->width * (viewport_row+row) + (viewport_col+col);
             shift_out_block(&GLYPHS[pgm_read_byte(&loc->map[ i ])*8]);
         }
     }
+}
+
+void display_hud(unsigned int value)
+{
+    for (byte d=0 ; d<4 ; d++)    // Button Mapping
+    {
+        display_block( &GLYPHS[((value % 10)+DIGIT_OFFSET)*8], 4-d, 0);
+        value = value / 10;
+    }
     
-    // Drawing sections of screen
-    // https://www.ccsinfo.com/forum/viewtopic.php?p=217165
+    delay_ms(50);
 }
 
 void display_player(mob_type *player)
 {
-    display_block(&GLYPHS[player->glyph], (player->position.x-viewport_col)*8, (player->position.y-viewport_row));
+    display_block(&GLYPHS[player->glyph], player->position.x-viewport_col, (player->position.y-viewport_row));
 }
 
 mob_type *update_mobs(location *loc, mob_type *player)
@@ -56,8 +65,11 @@ void display_mobs(location *loc)
     {
         if (loc->mobs[i])
         {
-            //Need to check that it's actually within the viewport
-            display_block(&GLYPHS[loc->mobs[i]->glyph], (loc->mobs[i]->position.x-viewport_col)*8, (loc->mobs[i]->position.y-viewport_row));
+            if (loc->mobs[i]->position.x >= viewport_col && loc->mobs[i]->position.x < viewport_col+SCREEN_COLUMNS && 
+                loc->mobs[i]->position.y >= viewport_row && loc->mobs[i]->position.y < viewport_row+SCREEN_ROWS )
+            {
+                display_block(&GLYPHS[loc->mobs[i]->glyph], loc->mobs[i]->position.x-viewport_col, (loc->mobs[i]->position.y-viewport_row));
+            }
         }
     }
 }
@@ -71,7 +83,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     delay_ms(10);
     crap_beep(SND, _A5, 35);
     delay_ms(30);
-    crap_beep(SND, _C4, 20);
+    crap_beep(SND, _B5, 20);
     delay_ms(10);
     crap_beep(SND, _C5, 35);
     
@@ -158,6 +170,8 @@ int main (void)
         t = millis();
             
         btn_val = analog_read(ADC2);
+        
+        //display_hud(btn_val);
         
         if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR && btn_timers[0] == 0)
         {
@@ -285,7 +299,7 @@ int main (void)
             player.position.y = 0;
         if (player.position.y > current_location->height-1)
             player.position.y = current_location->height-1;
-        
+
         if (map_dirty)
         {
             viewport_col = player.position.x-SCREEN_COLUMNS/2;
@@ -305,7 +319,6 @@ int main (void)
             map_dirty = FALSE;
         }
         
-        //display_hud();
         display_player(&player);
         
         mob_type *opponent = update_mobs(current_location, &player);
@@ -321,5 +334,6 @@ int main (void)
         display_mobs(current_location);
         
         //delta = millis() - t;
+        //display_hud(delta);
     }
 }

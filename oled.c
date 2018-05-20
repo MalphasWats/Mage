@@ -196,27 +196,29 @@ void initialise_oled(void)
     send_command(0xA4 );        // DISPLAYALLON_RESUME
     send_command(0xA6 );        // NORMALDISPLAY
 
-    send_command(0x2E );        // DEACTIVATE_SCROLL
+    //send_command(0x2E );        // DEACTIVATE_SCROLL
 
     send_command(0xAF);         // DISPLAYON
 }
 
 void clear_display(void)
 {
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-    
-    for (byte i=0 ; i<128 ; i++)
+    for (byte row=0 ; row<SCREEN_ROWS ; row++)
     {
-        shift_out_block(&BLANK[0]);
+        PORTB &= ~(1 << DC);        // LOW
+        send_command(0xB0 + row);         //  PAGEADDR
+        
+        send_command(0x0 + SCREEN_RAM_OFFSET);         //  LOW COL ADDR
+        //send_command(6);            // Column start address (0 = reset)
+
+        send_command(0x10);         //  HIGH COL ADDR
+        //send_command(0);            // Column start address (0 = reset)
+        
+        PORTB |= 1 << DC;           // HIGH
+        for (byte col=0 ; col<SCREEN_COLUMNS ; col++)
+        {
+            shift_out_block(&BLANK[0]);
+        }
     }
 }
 
@@ -238,13 +240,9 @@ void display_image(const byte *img, int col, int row, int width, int height)
     {
         PORTB &= ~(1 << DC);        // LOW
         
-        send_command(0x21);         //  COLUMNADDR
-        send_command(col*8);            // Column start address (0 = reset)
-        send_command(WIDTH - 1);    // Column end address (127 = reset)
-        
-        send_command(0x22);         //  PAGEADDR
-        send_command(row+h);        // Page start address (0 = reset)
-        send_command(7);            // Page end address // 64 lines
+        send_command(0xB0 + row+h);         //  PAGEADDR
+        send_command((col*8) & 0x0F);            // Column start address (0 = reset)
+        send_command(0x10 | ((col*8) >> 4));         //  LOW COL ADDR
         
         PORTB |= 1 << DC;           // HIGH
     
@@ -253,13 +251,22 @@ void display_image(const byte *img, int col, int row, int width, int height)
     }
     
     PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
+    
+    send_command(0x00 + SCREEN_RAM_OFFSET);         
+    send_command(0x10);            
+    send_command(0xB0);
+    
+    PORTB |= 1 << DC;           // HIGH
+}
 
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
+void set_display_row(int row)
+{
+    PORTB &= ~(1 << DC);        // LOW
+    
+    send_command(0xB0 + row);         //  PAGEADDR
+    send_command(0x00 + SCREEN_RAM_OFFSET);            // Column start address (0 = reset)
+    send_command(0x10);         //  LOW COL ADDR
+    
     
     PORTB |= 1 << DC;           // HIGH
 }
@@ -267,84 +274,13 @@ void display_image(const byte *img, int col, int row, int width, int height)
 void display_block(const byte *block, int col, int row)
 {
     PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(col);          // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(row);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
+    
+    send_command(0xB0 + row);         //  PAGEADDR
+    send_command((col*8+SCREEN_RAM_OFFSET) & 0x0F);            // Column start address (0 = reset)
+    send_command(0x10 | ((col*8+SCREEN_RAM_OFFSET) >> 4));         //  LOW COL ADDR
+    
     
     PORTB |= 1 << DC;           // HIGH
     
     shift_out_block(block);
-    
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
 }
-
-/*void display_hud(void)
-{
-    
-    if (hud_timer == 0)
-        {
-            if (btn_val > 50)
-            {
-                delta = btn_val;
-                for (byte d=0 ; d<4 ; d++)    // Button Mapping
-                {
-                    HUD[3-d] = (delta % 10);
-                    delta = delta / 10;
-                }
-            }
-            else 
-            {
-                for (byte d=0 ; d<3 ; d++)      // Frame Time
-                {
-                    HUD[3-d] = (delta % 10);
-                    delta = delta / 10;
-                }
-                HUD[0] = 0;
-            }
-            
-            hud_timer = t;
-        }
-        if (t - hud_timer > 100)
-            hud_timer = 0;
-        
-        
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(10*8);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-    
-    shift_out_block(&GLYPHS[(HUD[0])*8]);
-    shift_out_block(&GLYPHS[(HUD[1]+DIGIT_OFFSET)*8]);
-    shift_out_block(&GLYPHS[(HUD[2]+DIGIT_OFFSET)*8]);
-    shift_out_block(&GLYPHS[(HUD[3]+DIGIT_OFFSET)*8]);
-    
-    PORTB &= ~(1 << DC);        // LOW
-    send_command(0x21);         //  COLUMNADDR
-    send_command(0);            // Column start address (0 = reset)
-    send_command(WIDTH - 1);    // Column end address (127 = reset)
-
-    send_command(0x22);         //  PAGEADDR
-    send_command(0);            // Page start address (0 = reset)
-    send_command(7);            // Page end address // 64 lines
-    
-    PORTB |= 1 << DC;           // HIGH
-}*/

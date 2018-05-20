@@ -15,11 +15,13 @@
 #define CMD     LOW
 #define DATA    HIGH
 
-#define WIDTH   128
+#define WIDTH   132  //SH1106  //SSD1306 = 128
 #define HEIGHT  64
 
 #define SCREEN_COLUMNS 16
 #define SCREEN_ROWS    8
+
+#define SCREEN_RAM_OFFSET 2 //SH1106 //SSD1306 = 0
 
 static const byte BLANK[] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -35,5 +37,7 @@ void display_on(void);
 
 void display_image(const byte *img, int col, int row, int width, int height);
 void display_block(const byte *block, int col, int row);
+
+void set_display_row(int row);
 
 #endif

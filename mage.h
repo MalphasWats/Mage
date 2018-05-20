@@ -13,10 +13,10 @@
 #define BTN_DELAY       180
 
 /* Button ADC Values */
-#define _UP     688
+#define _UP     695 //688
 #define _DOWN   852
 #define _LEFT   930
-#define _RIGHT  678
+#define _RIGHT  610 //678
 #define _A      514
 #define _B      312
 #define _C      254
@@ -50,6 +50,7 @@ static const byte LOGO[] PROGMEM = {
 };
 
 void display_map(location *loc);
+void display_hud(unsigned int value);
 void display_player(mob_type *player);
 mob_type *update_mobs(location *loc, mob_type *player);
 void display_mobs(location *loc);
