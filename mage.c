@@ -116,6 +116,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 2);
     
     //draw player TODO: scale x2
+    //http://tech-algorithm.com/articles/nearest-neighbor-image-scaling/
     /*byte glyph[8];
     for (int i=0 ; i<8 ; i++)
         glyph[i] = pgm_read_byte(&GLYPHS[player->glyph]+i);
@@ -147,7 +148,6 @@ void battle_mode(mob_type *player, mob_type *opponent)
     {
         shift_out((byte)buffer[i+16], LSBFIRST);
     }*/
-    
     
     display_block(&GLYPHS[player->glyph], 1, 6);
     for(int i=0 ; i<player->hitpoints/2 ; i++)
@@ -188,6 +188,23 @@ void battle_mode(mob_type *player, mob_type *opponent)
             opponent->dead = TRUE;
             in_battle=FALSE;
         }
+        
+        if (t - btn_timers[0] > BTN_DELAY)
+            btn_timers[0] = 0;
+        if (t - btn_timers[1] > BTN_DELAY)
+            btn_timers[1] = 0;
+        if (t - btn_timers[2] > BTN_DELAY)
+            btn_timers[2] = 0;
+        if (t - btn_timers[3] > BTN_DELAY)
+            btn_timers[3] = 0;
+        if (t - btn_timers[4] > BTN_DELAY)
+            btn_timers[4] = 0;
+        if (t - btn_timers[5] > BTN_DELAY)
+            btn_timers[5] = 0;
+        if (t - btn_timers[6] > BTN_DELAY)
+            btn_timers[6] = 0;
+        if (t - btn_timers[7] > BTN_DELAY)
+            btn_timers[7] = 0;
     }
     //resolve combat
     
@@ -231,12 +248,14 @@ int main (void)
     location *current_location = &village;
     
     mob_type mob = {
-        .glyph = (PLAYER_OFFSET+7)*8,
+        .glyph = (PLAYER_OFFSET+7)*8,   // Blob
         .position = {.x=16, .y=13},
     
         .hitpoints = 2,
         .attack_damage = 1,
         .num_attacks = 1,
+        
+        .tactics = 0b10101010, // blobs just attack
     
         .dead = FALSE,
     };
@@ -250,6 +269,8 @@ int main (void)
         .hitpoints = 5,
         .attack_damage = 2,
         .num_attacks = 2,
+        
+        .tactics = 0, // Not applicable to player
     
         .dead = FALSE,
     };
