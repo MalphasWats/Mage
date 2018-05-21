@@ -2,7 +2,7 @@ from PIL import Image
 
 MAP = "house"
 
-im = Image.open("tiles.png")
+im = Image.open("interface.png")
 pixels = list(im.getdata())
 
 def extract_block(offsetX, offsetY):
@@ -24,7 +24,7 @@ for y in range(im.size[1]//8):
         b = extract_block(x, y)
         glyphs.append(b)
 
-f = open('tiles.txt', 'w')
+f = open('interface.txt', 'w')
 for g in glyphs:
     f.write('\t')
     f.write(g)
@@ -32,7 +32,7 @@ for g in glyphs:
 
 f.close()
 im.close()
-
+exit()
 f = open('{}.txt'.format(MAP), 'w')
 im = Image.open('{}.png'.format(MAP))
 
