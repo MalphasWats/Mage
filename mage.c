@@ -116,7 +116,37 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 2);
     
     //draw player TODO: scale x2
-    display_block(&GLYPHS[player->glyph], 1, 6);
+    byte glyph[8];
+    for (int i=0 ; i<8 ; i++)
+        glyph[i] = pgm_read_byte(&GLYPHS[player->glyph]+i);
+    
+    unsigned int buffer[8*2];
+    for (int pix=0 ; pix<8*8 ; pix++)
+    {
+        if(glyph[pix/8] & (1 << pix%8))
+        {
+            buffer[pix/4] |= 3<<pix%4;
+            buffer[(pix/4)+1] |= 3<<pix%4;
+        }
+    }
+    
+    set_display_col_row(1, 6);
+    for (int i=0 ; i<16 ; i++)
+    {
+        shift_out((byte)buffer[i]>>8, LSBFIRST);
+    }
+    
+    set_display_col_row(1, 7);
+    for (int i=0 ; i<16 ; i++)
+    {
+        shift_out((byte)buffer[i]&0x00FF, LSBFIRST);
+    }
+    
+    
+    //display_block(&GLYPHS[player->glyph], 1, 6);
+    
+    
+    
     for(int i=0 ; i<player->hitpoints/2 ; i++)
     {
         display_block(&GLYPHS[3*8], 0+i, 5);

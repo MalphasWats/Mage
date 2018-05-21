@@ -39,5 +39,6 @@ void display_image(const byte *img, int col, int row, int width, int height);
 void display_block(const byte *block, int col, int row);
 
 void set_display_row(int row);
+void set_display_col_row(int col, int row);
 
 #endif

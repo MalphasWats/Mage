@@ -267,6 +267,16 @@ void set_display_row(int row)
     send_command(0x00 + SCREEN_RAM_OFFSET);            // Column start address (0 = reset)
     send_command(0x10);         //  LOW COL ADDR
     
+    PORTB |= 1 << DC;           // HIGH
+}
+
+void set_display_col_row(int col, int row)
+{
+    PORTB &= ~(1 << DC);        // LOW
+    
+    send_command(0xB0 + row);         //  PAGEADDR
+    send_command((col*8) & 0x0F);            // Column start address (0 = reset)
+    send_command(0x10 | ((col*8) >> 4));         //  LOW COL ADDR
     
     PORTB |= 1 << DC;           // HIGH
 }
