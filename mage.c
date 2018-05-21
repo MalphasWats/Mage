@@ -121,25 +121,31 @@ void battle_mode(mob_type *player, mob_type *opponent)
         glyph[i] = pgm_read_byte(&GLYPHS[player->glyph]+i);
     
     unsigned int buffer[8*2];
-    for (int pix=0 ; pix<8*8 ; pix++)
+    unsigned long x_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
+    unsigned long y_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
+    
+    int x2, y2 ;
+    for (int i=0;i<16;i++) 
     {
-        if(glyph[pix/8] & (1 << pix%8))
+        for (int j=0;j<16;j++) 
         {
-            buffer[pix/4] |= 3<<pix%4;
-            buffer[(pix/4)+1] |= 3<<pix%4;
-        }
+            x2 = ((j*x_ratio)>>16) ;
+            y2 = ((i*y_ratio)>>16) ;
+            if (glyph[y2] & (1 << x2))
+                buffer[i] |= 1 << j;
+        }                
     }
     
     set_display_col_row(1, 6);
     for (int i=0 ; i<16 ; i++)
     {
-        shift_out((byte)buffer[i]>>8, LSBFIRST);
+        shift_out((byte)buffer[i], LSBFIRST);
     }
     
     set_display_col_row(1, 7);
     for (int i=0 ; i<16 ; i++)
     {
-        shift_out((byte)buffer[i]&0x00FF, LSBFIRST);
+        shift_out((byte)buffer[i+16], LSBFIRST);
     }*/
     
     
