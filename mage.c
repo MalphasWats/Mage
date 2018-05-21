@@ -7,6 +7,9 @@
 
 byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
 unsigned int btn_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int btn_val = 0;
+
+unsigned int t;
 
 int viewport_col = 0;
 int viewport_row = 0;
@@ -49,7 +52,8 @@ mob_type *update_mobs(location *loc, mob_type *player)
         if (loc->mobs[i])
         {
             if (loc->mobs[i]->position.x == player->position.x && 
-                loc->mobs[i]->position.y == player->position.y)
+                loc->mobs[i]->position.y == player->position.y &&
+                !loc->mobs[i]->dead)
             {
                 return loc->mobs[i];
             }
@@ -76,6 +80,17 @@ void display_mobs(location *loc)
 
 void battle_mode(mob_type *player, mob_type *opponent)
 {
+    byte in_battle = TRUE;
+    btn_timers[0] = 0;
+    btn_timers[1] = 0;
+    btn_timers[2] = 0;
+    btn_timers[3] = 0;
+    btn_timers[4] = 0;
+    btn_timers[5] = 0;
+    btn_timers[6] = 0;
+    btn_timers[7] = 0;
+    
+    t = millis();
     //clear screen
     clear_display();
     
@@ -89,15 +104,58 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     
     //draw ui
+    display_block(&GLYPHS[32], 1, 1);
+    display_block(&GLYPHS[DIGIT_OFFSET], 2, 1);
+    display_block(&GLYPHS[DIGIT_OFFSET], 3, 1);
     
-    //draw opponent
+    display_block(&GLYPHS[7], 5, 4);
+    display_block(&GLYPHS[8], 5+player->num_attacks+1, 4);
+    
+    //TODO: Need to be cleverer about lining these up
+    display_block(&GLYPHS[7], 5-player->num_attacks-1, 2);
+    display_block(&GLYPHS[8], 5+player->num_attacks+1, 2);
+    
+    //draw player TODO: scale x2
+    display_block(&GLYPHS[player->glyph], 1, 6);
+    for(int i=0 ; i<player->hitpoints/2 ; i++)
+    {
+        display_block(&GLYPHS[3], 0+i, 5);
+    }
+    if (player->hitpoints%2)
+    {
+        display_block(&GLYPHS[29], 0+(player->hitpoints/2)+1, 5);
+    }
+    
+    //draw opponent TODO: scale x2
+    display_block(&GLYPHS[opponent->glyph], 13, 2);
+    for(int i=0 ; i<opponent->hitpoints/2 ; i++)
+    {
+        display_block(&GLYPHS[3], 15-i, 1);
+    }
+    if (opponent->hitpoints%2)
+    {
+        display_block(&GLYPHS[29], 15-(opponent->hitpoints/2)-1, 1);
+    }
     
     //start countdown
     
     //choose opponent action(s)
     
     //await player actions
-    
+    while(in_battle)
+    {
+        btn_val = analog_read(ADC2);
+        if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR && btn_timers[6] == 0)
+        {
+            crap_beep(SND, _Gs5, 20);
+            
+            btn_timers[6] = t;
+            
+            // End battle mode for now
+            opponent->dead = TRUE;
+            in_battle=FALSE;
+        }
+    }
     //resolve combat
     
     //update ui
@@ -131,9 +189,7 @@ int main (void)
     send_command(0xA7);        // INVERTEDDISPLAY
     PORTB |= 1 << DC;           // HIGH
     
-    unsigned int t;
     //unsigned int delta = 0;
-    unsigned int btn_val = 0;
     //unsigned int hud_timer = 0;
     
     byte map_dirty = TRUE;
@@ -168,7 +224,7 @@ int main (void)
     for(ever)
     {
         t = millis();
-            
+        
         btn_val = analog_read(ADC2);
         
         //display_hud(btn_val);
