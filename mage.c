@@ -112,7 +112,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 4);
     
     //TODO: Need to be cleverer about lining these up
-    display_block(&GLYPHS[8*8], 5-player->num_attacks-1, 2);
+    display_block(&GLYPHS[8*8], 5+player->num_attacks-opponent->num_attacks, 2);
     display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 2);
     
     //draw player TODO: scale x2
