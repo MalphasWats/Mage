@@ -104,37 +104,37 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     
     //draw ui
-    display_block(&GLYPHS[32], 1, 1);
-    display_block(&GLYPHS[DIGIT_OFFSET], 2, 1);
-    display_block(&GLYPHS[DIGIT_OFFSET], 3, 1);
+    display_block(&GLYPHS[32*8], 1, 1);
+    display_block(&GLYPHS[DIGIT_OFFSET*8], 2, 1);
+    display_block(&GLYPHS[DIGIT_OFFSET*8], 3, 1);
     
-    display_block(&GLYPHS[7], 5, 4);
-    display_block(&GLYPHS[8], 5+player->num_attacks+1, 4);
+    display_block(&GLYPHS[8*8], 5, 4);
+    display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 4);
     
     //TODO: Need to be cleverer about lining these up
-    display_block(&GLYPHS[7], 5-player->num_attacks-1, 2);
-    display_block(&GLYPHS[8], 5+player->num_attacks+1, 2);
+    display_block(&GLYPHS[8*8], 5-player->num_attacks-1, 2);
+    display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 2);
     
     //draw player TODO: scale x2
     display_block(&GLYPHS[player->glyph], 1, 6);
     for(int i=0 ; i<player->hitpoints/2 ; i++)
     {
-        display_block(&GLYPHS[3], 0+i, 5);
+        display_block(&GLYPHS[3*8], 0+i, 5);
     }
     if (player->hitpoints%2)
     {
-        display_block(&GLYPHS[29], 0+(player->hitpoints/2)+1, 5);
+        display_block(&GLYPHS[29*8], 0+(player->hitpoints/2)+1, 5);
     }
     
     //draw opponent TODO: scale x2
     display_block(&GLYPHS[opponent->glyph], 13, 2);
     for(int i=0 ; i<opponent->hitpoints/2 ; i++)
     {
-        display_block(&GLYPHS[3], 15-i, 1);
+        display_block(&GLYPHS[3*8], 15-i, 1);
     }
     if (opponent->hitpoints%2)
     {
-        display_block(&GLYPHS[29], 15-(opponent->hitpoints/2)-1, 1);
+        display_block(&GLYPHS[29*8], 15-(opponent->hitpoints/2)-1, 1);
     }
     
     //start countdown
