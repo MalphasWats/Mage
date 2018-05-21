@@ -144,27 +144,24 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     
     display_block(&GLYPHS[player->glyph], 1, 6);
-    
-    
-    
     for(int i=0 ; i<player->hitpoints/2 ; i++)
     {
-        display_block(&GLYPHS[3*8], 0+i, 5);
+        display_block(&GLYPHS[108*8], 0+i, 5);
     }
     if (player->hitpoints%2)
     {
-        display_block(&GLYPHS[29*8], 0+(player->hitpoints/2), 5);
+        display_block(&GLYPHS[109*8], 0+(player->hitpoints/2), 5);
     }
     
     //draw opponent TODO: scale x2
     display_block(&GLYPHS[opponent->glyph], 13, 2);
     for(int i=0 ; i<opponent->hitpoints/2 ; i++)
     {
-        display_block(&GLYPHS[3*8], 15-i, 1);
+        display_block(&GLYPHS[108*8], 15-i, 1);
     }
     if (opponent->hitpoints%2)
     {
-        display_block(&GLYPHS[29*8], 15-(opponent->hitpoints/2), 1);
+        display_block(&GLYPHS[109*8], 15-(opponent->hitpoints/2), 1);
     }
     
     //start countdown
@@ -231,7 +228,7 @@ int main (void)
         .glyph = (PLAYER_OFFSET+7)*8,
         .position = {.x=16, .y=13},
     
-        .hitpoints = 3,
+        .hitpoints = 2,
         .attack_damage = 1,
         .num_attacks = 1,
     
@@ -244,7 +241,7 @@ int main (void)
         .glyph = PLAYER_OFFSET*8,
         .position = current_location->portal_in,
     
-        .hitpoints = 10,
+        .hitpoints = 5,
         .attack_damage = 2,
         .num_attacks = 2,
     
