@@ -116,7 +116,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+player->num_attacks+1, 2);
     
     //draw player TODO: scale x2
-    byte glyph[8];
+    /*byte glyph[8];
     for (int i=0 ; i<8 ; i++)
         glyph[i] = pgm_read_byte(&GLYPHS[player->glyph]+i);
     
@@ -140,10 +140,10 @@ void battle_mode(mob_type *player, mob_type *opponent)
     for (int i=0 ; i<16 ; i++)
     {
         shift_out((byte)buffer[i]&0x00FF, LSBFIRST);
-    }
+    }*/
     
     
-    //display_block(&GLYPHS[player->glyph], 1, 6);
+    display_block(&GLYPHS[player->glyph], 1, 6);
     
     
     
