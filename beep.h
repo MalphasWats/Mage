@@ -24,6 +24,6 @@
 #define _A8    142/2  // 7040                 F
 #define _A9    71/2  // 14080hz             X
 
-void crap_beep(unsigned int pin, unsigned int note, unsigned int dur);
+void crap_beep(unsigned int note, unsigned int dur);
 
 #endif

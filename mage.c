@@ -94,13 +94,13 @@ void battle_mode(mob_type *player, mob_type *opponent)
     //clear screen
     clear_display();
     
-    crap_beep(SND, _A4, 20);
+    crap_beep(_A4, 20);
     delay_ms(10);
-    crap_beep(SND, _A5, 35);
+    crap_beep(_A5, 35);
     delay_ms(30);
-    crap_beep(SND, _B5, 20);
+    crap_beep(_B5, 20);
     delay_ms(10);
-    crap_beep(SND, _C5, 35);
+    crap_beep(_C5, 35);
     
     
     //draw ui
@@ -180,7 +180,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
         btn_val = analog_read(ADC2);
         if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR && btn_timers[6] == 0)
         {
-            crap_beep(SND, _Gs5, 20);
+            crap_beep(_Gs5, 20);
             
             btn_timers[6] = t;
             
@@ -229,9 +229,9 @@ int main (void)
     PORTB |= 1 << DC;           // HIGH
     
     display_image(&LOGO[0], 3, 3, 10, 2);
-    crap_beep(SND, _A5, 140);
+    crap_beep(_A5, 140);
     delay_ms(5);
-    crap_beep(SND, _A8, 60);
+    crap_beep(_A8, 60);
     
     delay_ms(SPLASH_DELAY);
     
@@ -289,7 +289,7 @@ int main (void)
             {
                 player.position.x -= 1;
                 map_dirty = TRUE;
-                crap_beep(SND, _A9, 5);
+                crap_beep(_A9, 5);
             }
             
             btn_timers[0] = t;
@@ -300,7 +300,7 @@ int main (void)
             {
                 player.position.x += 1;
                 map_dirty = TRUE;
-                crap_beep(SND, _A9, 5);
+                crap_beep(_A9, 5);
             }
             btn_timers[1] = t;
         }
@@ -310,7 +310,7 @@ int main (void)
             {
                 player.position.y -= 1;
                 map_dirty = TRUE;
-                crap_beep(SND, _A9, 5);
+                crap_beep(_A9, 5);
             }
             
             btn_timers[2] = t;
@@ -321,7 +321,7 @@ int main (void)
             {
                 player.position.y += 1;
                 map_dirty = TRUE;
-                crap_beep(SND, _A9, 5);
+                crap_beep(_A9, 5);
             }
             
             btn_timers[3] = t;
@@ -335,7 +335,7 @@ int main (void)
                 player.position = current_location->portal_in;
                 current_location = current_location->return_to;
                 map_dirty = TRUE;
-                crap_beep(SND, _A9, 5);
+                crap_beep(_A9, 5);
             }
             else 
             {
@@ -349,7 +349,7 @@ int main (void)
                         player.position.y = current_location->portal_out.y;
                         
                         map_dirty = TRUE;
-                        crap_beep(SND, _A9, 5);
+                        crap_beep(_A9, 5);
                         
                         break;
                     }
@@ -362,7 +362,7 @@ int main (void)
         {
             map_dirty = TRUE;
             
-            crap_beep(SND, _A9, 5);
+            crap_beep(_A9, 5);
             
             btn_timers[5] = t;
         }
@@ -370,7 +370,7 @@ int main (void)
         {
             map_dirty = TRUE;
                 
-            crap_beep(SND, _A9, 5);
+            crap_beep(_A9, 5);
             
             btn_timers[6] = t;
         }
@@ -378,7 +378,7 @@ int main (void)
         {
             map_dirty = TRUE;
                 
-            crap_beep(SND, _A9, 5);
+            crap_beep(_A9, 5);
             
             btn_timers[7] = t;
         }
@@ -435,9 +435,9 @@ int main (void)
         
         if (opponent != 0)
         {
-            crap_beep(SND, _A4, 20);
+            crap_beep(_A4, 20);
             delay_ms(10);
-            crap_beep(SND, _A5, 35);
+            crap_beep(_A5, 35);
             battle_mode(&player, opponent);
         }
         
