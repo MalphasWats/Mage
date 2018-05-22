@@ -11,8 +11,8 @@ int btn_val = 0;
 
 unsigned int t;
 
-byte viewport_col = 0;
-byte viewport_row = 0;
+int viewport_col = 0;
+int viewport_row = 0;
 
 void display_map(location *loc)
 {   
