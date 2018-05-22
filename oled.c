@@ -263,8 +263,8 @@ void set_display_col_row(byte col, byte row)
     PORTB &= ~(1 << DC);        // LOW
     
     send_command(0xB0 + row);         //  PAGEADDR
-    send_command((col*8) & 0x0F);            // Column start address (0 = reset)
-    send_command(0x10 | ((col*8) >> 4));         //  LOW COL ADDR
+    send_command((col*8 + SCREEN_RAM_OFFSET) & 0x0F);            // Column start address (0 = reset)
+    send_command(0x10 | ((col*8 + SCREEN_RAM_OFFSET) >> 4));         //  LOW COL ADDR
     
     PORTB |= 1 << DC;           // HIGH
 }
