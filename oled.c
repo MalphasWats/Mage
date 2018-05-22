@@ -205,14 +205,15 @@ void clear_display(void)
 {
     for (byte row=0 ; row<SCREEN_ROWS ; row++)
     {
-        PORTB &= ~(1 << DC);        // LOW
+        set_display_col_row(0, row);
+        /*PORTB &= ~(1 << DC);        // LOW
         send_command(0xB0 + row);         //  PAGEADDR
         
         send_command(0x0 + SCREEN_RAM_OFFSET);         //  LOW COL ADDR
         //send_command(6);            // Column start address (0 = reset)
 
         send_command(0x10);         //  HIGH COL ADDR
-        //send_command(0);            // Column start address (0 = reset)
+        //send_command(0);            // Column start address (0 = reset)*/
         
         PORTB |= 1 << DC;           // HIGH
         for (byte col=0 ; col<SCREEN_COLUMNS ; col++)
@@ -238,36 +239,23 @@ void display_image(const byte *img, byte col, byte row, byte width, byte height)
 {
     for (byte h=0 ; h<height ; h++)
     {
-        PORTB &= ~(1 << DC);        // LOW
+        set_display_col_row(col, row+h);
         
-        send_command(0xB0 + row+h);         //  PAGEADDR
-        send_command((col*8) & 0x0F);            // Column start address (0 = reset)
-        send_command(0x10 | ((col*8) >> 4));         //  LOW COL ADDR
-        
-        PORTB |= 1 << DC;           // HIGH
-    
         for (byte w=0 ; w<width ; w++)
             shift_out_block(&img[(width * h + w)*8]);
     }
-    
-    PORTB &= ~(1 << DC);        // LOW
-    
-    send_command(0x00 + SCREEN_RAM_OFFSET);         
-    send_command(0x10);            
-    send_command(0xB0);
-    
-    PORTB |= 1 << DC;           // HIGH
 }
 
 void set_display_row(byte row)
 {
-    PORTB &= ~(1 << DC);        // LOW
+    set_display_col_row(0, row);
+    /*PORTB &= ~(1 << DC);        // LOW
     
     send_command(0xB0 + row);         //  PAGEADDR
     send_command(0x00 + SCREEN_RAM_OFFSET);            // Column start address (0 = reset)
     send_command(0x10);         //  LOW COL ADDR
     
-    PORTB |= 1 << DC;           // HIGH
+    PORTB |= 1 << DC;           // HIGH*/
 }
 
 void set_display_col_row(byte col, byte row)
@@ -283,14 +271,14 @@ void set_display_col_row(byte col, byte row)
 
 void display_block(const byte *block, byte col, byte row)
 {
-    PORTB &= ~(1 << DC);        // LOW
+    /*PORTB &= ~(1 << DC);        // LOW
     
     send_command(0xB0 + row);         //  PAGEADDR
     send_command((col*8+SCREEN_RAM_OFFSET) & 0x0F);            // Column start address (0 = reset)
     send_command(0x10 | ((col*8+SCREEN_RAM_OFFSET) >> 4));         //  LOW COL ADDR
     
     
-    PORTB |= 1 << DC;           // HIGH
-    
+    PORTB |= 1 << DC;           // HIGH*/
+    set_display_col_row(col, row);
     shift_out_block(block);
 }

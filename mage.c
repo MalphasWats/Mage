@@ -5,8 +5,8 @@
 #include "glyphs.h"
 #include "beep.h"
 
-byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
-unsigned int btn_timers[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+//byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
+unsigned int btn_timer = 0;
 int btn_val = 0;
 
 unsigned int t;
@@ -42,7 +42,7 @@ void display_hud(unsigned int value)
 
 void display_player(mob_type *player)
 {
-    display_block(&GLYPHS[player->glyph], player->position.x-viewport_col, (player->position.y-viewport_row));
+    display_block(&GLYPHS[player->glyph*8], player->position.x-viewport_col, (player->position.y-viewport_row));
 }
 
 mob_type *update_mobs(location *loc, mob_type *player)
@@ -72,7 +72,7 @@ void display_mobs(location *loc)
             if (loc->mobs[i]->position.x >= viewport_col && loc->mobs[i]->position.x < viewport_col+SCREEN_COLUMNS && 
                 loc->mobs[i]->position.y >= viewport_row && loc->mobs[i]->position.y < viewport_row+SCREEN_ROWS )
             {
-                display_block(&GLYPHS[loc->mobs[i]->glyph], loc->mobs[i]->position.x-viewport_col, (loc->mobs[i]->position.y-viewport_row));
+                display_block(&GLYPHS[loc->mobs[i]->glyph*8], loc->mobs[i]->position.x-viewport_col, (loc->mobs[i]->position.y-viewport_row));
             }
         }
     }
@@ -81,14 +81,7 @@ void display_mobs(location *loc)
 void battle_mode(mob_type *player, mob_type *opponent)
 {
     byte in_battle = TRUE;
-    btn_timers[0] = 0;
-    btn_timers[1] = 0;
-    btn_timers[2] = 0;
-    btn_timers[3] = 0;
-    btn_timers[4] = 0;
-    btn_timers[5] = 0;
-    btn_timers[6] = 0;
-    btn_timers[7] = 0;
+    btn_timer = 0;
     
     t = millis();
     //clear screen
@@ -149,7 +142,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
         shift_out((byte)buffer[i+16], LSBFIRST);
     }*/
     
-    display_block(&GLYPHS[player->glyph], 1, 6);
+    display_block(&GLYPHS[player->glyph*8], 1, 6);
     for(byte i=0 ; i<player->hitpoints/2 ; i++)
     {
         display_block(&GLYPHS[255*8], 0+i, 5);
@@ -160,7 +153,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     }
     
     //draw opponent TODO: scale x2
-    display_block(&GLYPHS[opponent->glyph], 13, 2);
+    display_block(&GLYPHS[opponent->glyph*8], 13, 2);
     for(byte i=0 ; i<opponent->hitpoints/2 ; i++)
     {
         display_block(&GLYPHS[255*8], 15-i, 1);
@@ -178,33 +171,20 @@ void battle_mode(mob_type *player, mob_type *opponent)
     while(in_battle)
     {
         btn_val = analog_read(ADC2);
-        if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR && btn_timers[6] == 0)
+        if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR && btn_timer == 0)
         {
             crap_beep(_Gs5, 20);
             
-            btn_timers[6] = t;
+            btn_timer = t;
             
             // End battle mode for now
             opponent->dead = TRUE;
             in_battle=FALSE;
         }
         
-        if (t - btn_timers[0] > BTN_DELAY)
-            btn_timers[0] = 0;
-        if (t - btn_timers[1] > BTN_DELAY)
-            btn_timers[1] = 0;
-        if (t - btn_timers[2] > BTN_DELAY)
-            btn_timers[2] = 0;
-        if (t - btn_timers[3] > BTN_DELAY)
-            btn_timers[3] = 0;
-        if (t - btn_timers[4] > BTN_DELAY)
-            btn_timers[4] = 0;
-        if (t - btn_timers[5] > BTN_DELAY)
-            btn_timers[5] = 0;
-        if (t - btn_timers[6] > BTN_DELAY)
-            btn_timers[6] = 0;
-        if (t - btn_timers[7] > BTN_DELAY)
-            btn_timers[7] = 0;
+        if (t - btn_timer > BTN_DELAY)
+            btn_timer = 0;
+
     }
     //resolve combat
     
@@ -248,7 +228,7 @@ int main (void)
     location *current_location = &village;
     
     mob_type mob = {
-        .glyph = (PLAYER_OFFSET+7)*8,   // Blob
+        .glyph = (PLAYER_OFFSET+7),   // Blob
         .position = {.x=16, .y=13},
     
         .hitpoints = 2,
@@ -263,7 +243,7 @@ int main (void)
     current_location->mobs[0] = &mob;
     
     mob_type player = {
-        .glyph = PLAYER_OFFSET*8,
+        .glyph = PLAYER_OFFSET,
         .position = current_location->portal_in,
     
         .hitpoints = 5,
@@ -282,123 +262,111 @@ int main (void)
         btn_val = analog_read(ADC2);
         
         //display_hud(btn_val);
-        
-        if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR && btn_timers[0] == 0)
+        if (btn_timer == 0)
         {
-            if (!collide_at(current_location, player.position.x-1, player.position.y))
+            if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
             {
-                player.position.x -= 1;
-                map_dirty = TRUE;
-                crap_beep(_A9, 5);
-            }
-            
-            btn_timers[0] = t;
-        }
-        else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR && btn_timers[1] == 0)
-        {
-            if (!collide_at(current_location, player.position.x+1, player.position.y))
-            {
-                player.position.x += 1;
-                map_dirty = TRUE;
-                crap_beep(_A9, 5);
-            }
-            btn_timers[1] = t;
-        }
-        else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR && btn_timers[2] == 0)
-        {
-            if (!collide_at(current_location, player.position.x, player.position.y-1))
-            {
-                player.position.y -= 1;
-                map_dirty = TRUE;
-                crap_beep(_A9, 5);
-            }
-            
-            btn_timers[2] = t;
-        }
-        else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR && btn_timers[3] == 0)
-        {
-            if (!collide_at(current_location, player.position.x, player.position.y+1))
-            {
-                player.position.y += 1;
-                map_dirty = TRUE;
-                crap_beep(_A9, 5);
-            }
-            
-            btn_timers[3] = t;
-        }
-        else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR && btn_timers[4] == 0)
-        {
-            if (player.position.x == current_location->portal_out.x && 
-                player.position.y == current_location->portal_out.y &&
-                current_location->return_to != 0)
-            {
-                player.position = current_location->portal_in;
-                current_location = current_location->return_to;
-                map_dirty = TRUE;
-                crap_beep(_A9, 5);
-            }
-            else 
-            {
-                for (byte i=0 ; i<MAX_PORTALS ; i++)
+                if (!collide_at(current_location, player.position.x-1, player.position.y))
                 {
-                    if (player.position.x == current_location->portals[i]->portal_in.x && 
-                        player.position.y == current_location->portals[i]->portal_in.y)
+                    player.position.x -= 1;
+                    map_dirty = TRUE;
+                    crap_beep(_A9, 5);
+                }
+                
+                btn_timer = t;
+            }
+            else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
+            {
+                if (!collide_at(current_location, player.position.x+1, player.position.y))
+                {
+                    player.position.x += 1;
+                    map_dirty = TRUE;
+                    crap_beep(_A9, 5);
+                }
+                btn_timer = t;
+            }
+            else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR)
+            {
+                if (!collide_at(current_location, player.position.x, player.position.y-1))
+                {
+                    player.position.y -= 1;
+                    map_dirty = TRUE;
+                    crap_beep(_A9, 5);
+                }
+                
+                btn_timer = t;
+            }
+            else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR)
+            {
+                if (!collide_at(current_location, player.position.x, player.position.y+1))
+                {
+                    player.position.y += 1;
+                    map_dirty = TRUE;
+                    crap_beep(_A9, 5);
+                }
+                
+                btn_timer = t;
+            }
+            else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
+            {
+                if (player.position.x == current_location->portal_out.x && 
+                    player.position.y == current_location->portal_out.y &&
+                    current_location->return_to != 0)
+                {
+                    player.position = current_location->portal_in;
+                    current_location = current_location->return_to;
+                    map_dirty = TRUE;
+                    crap_beep(_A9, 5);
+                }
+                else 
+                {
+                    for (byte i=0 ; i<MAX_PORTALS ; i++)
                     {
-                        current_location = current_location->portals[i];
-                        player.position.x = current_location->portal_out.x;
-                        player.position.y = current_location->portal_out.y;
-                        
-                        map_dirty = TRUE;
-                        crap_beep(_A9, 5);
-                        
-                        break;
+                        if (player.position.x == current_location->portals[i]->portal_in.x && 
+                            player.position.y == current_location->portals[i]->portal_in.y)
+                        {
+                            current_location = current_location->portals[i];
+                            player.position.x = current_location->portal_out.x;
+                            player.position.y = current_location->portal_out.y;
+                            
+                            map_dirty = TRUE;
+                            crap_beep(_A9, 5);
+                            
+                            break;
+                        }
                     }
                 }
+                
+                btn_timer = t;
             }
-            
-            btn_timers[4] = t;
-        }
-        else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR && btn_timers[5] == 0)
-        {
-            map_dirty = TRUE;
-            
-            crap_beep(_A9, 5);
-            
-            btn_timers[5] = t;
-        }
-        else if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR && btn_timers[6] == 0)
-        {
-            map_dirty = TRUE;
+            else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR)
+            {
+                map_dirty = TRUE;
                 
-            crap_beep(_A9, 5);
-            
-            btn_timers[6] = t;
-        }
-        else if (btn_val >= _D && btn_timers[7] == 0)
-        {
-            map_dirty = TRUE;
+                crap_beep(_A9, 5);
                 
-            crap_beep(_A9, 5);
-            
-            btn_timers[7] = t;
+                btn_timer = t;
+            }
+            else if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR)
+            {
+                map_dirty = TRUE;
+                    
+                crap_beep(_A9, 5);
+                
+                btn_timer = t;
+            }
+            else if (btn_val >= _D)
+            {
+                map_dirty = TRUE;
+                    
+                crap_beep(_A9, 5);
+                
+                btn_timer = t;
+            }
         }
         
-        if (t - btn_timers[0] > BTN_DELAY)
-            btn_timers[0] = 0;
-        if (t - btn_timers[1] > BTN_DELAY)
-            btn_timers[1] = 0;
-        if (t - btn_timers[2] > BTN_DELAY)
-            btn_timers[2] = 0;
-        if (t - btn_timers[3] > BTN_DELAY)
-            btn_timers[3] = 0;
-        if (t - btn_timers[4] > BTN_DELAY)
-            btn_timers[4] = 0;
-        if (t - btn_timers[5] > BTN_DELAY)
-            btn_timers[5] = 0;
-        if (t - btn_timers[6] > BTN_DELAY)
-            btn_timers[6] = 0;
-        if (t - btn_timers[7] > BTN_DELAY)
-            btn_timers[7] = 0;
+        if (t - btn_timer > BTN_DELAY)
+            btn_timer = 0;
         
         if (player.position.x < 0)
             player.position.x = 0;
