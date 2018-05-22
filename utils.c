@@ -6,6 +6,13 @@
 
 unsigned int _millis = 0;
 
+unsigned int rngSEED = 5;
+unsigned int rng( void )
+{
+    rngSEED = (rngSEED*rngA +rngC) % rngM;
+    return rngSEED;
+}
+
 void delay_ms( int ms )
 {
    for (int i = 0; i < ms; i++)

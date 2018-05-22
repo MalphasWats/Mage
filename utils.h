@@ -21,6 +21,12 @@ typedef struct point {
     int y;
 } point;
 
+#define rngM 7919
+#define rngA 17
+#define rngC 3
+unsigned int rng( void );
+
+
 void delay_ms( int ms );
 void delay_us( int us );
 
