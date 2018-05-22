@@ -17,8 +17,8 @@
 typedef unsigned char byte;
 
 typedef struct point {
-    int x;
-    int y;
+    byte x;
+    byte y;
 } point;
 
 #define rngM 7919

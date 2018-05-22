@@ -6,12 +6,12 @@
 #define MAX_MOBS 8
 
 typedef struct mob_type {
-    int glyph;
+    byte glyph;
     point position;
     
-    int hitpoints;
+    byte hitpoints;
     
-    int attack_damage;
+    byte attack_damage;
     byte num_attacks;
     
     byte tactics; // 00 00 00 00 - 00 = wait, 01 = block, 10 = attack, 11 = reserved

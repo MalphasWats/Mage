@@ -11,8 +11,8 @@ int btn_val = 0;
 
 unsigned int t;
 
-int viewport_col = 0;
-int viewport_row = 0;
+byte viewport_col = 0;
+byte viewport_row = 0;
 
 void display_map(location *loc)
 {   
@@ -47,7 +47,7 @@ void display_player(mob_type *player)
 
 mob_type *update_mobs(location *loc, mob_type *player)
 {
-    for(int i=0 ; i<MAX_MOBS ; i++)
+    for(byte i=0 ; i<MAX_MOBS ; i++)
     {
         if (loc->mobs[i])
         {
@@ -65,7 +65,7 @@ mob_type *update_mobs(location *loc, mob_type *player)
 
 void display_mobs(location *loc)
 {
-    for(int i=0 ; i<MAX_MOBS ; i++)
+    for(byte i=0 ; i<MAX_MOBS ; i++)
     {
         if (loc->mobs[i])
         {
@@ -150,7 +150,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     }*/
     
     display_block(&GLYPHS[player->glyph], 1, 6);
-    for(int i=0 ; i<player->hitpoints/2 ; i++)
+    for(byte i=0 ; i<player->hitpoints/2 ; i++)
     {
         display_block(&GLYPHS[255*8], 0+i, 5);
     }
@@ -161,7 +161,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     //draw opponent TODO: scale x2
     display_block(&GLYPHS[opponent->glyph], 13, 2);
-    for(int i=0 ; i<opponent->hitpoints/2 ; i++)
+    for(byte i=0 ; i<opponent->hitpoints/2 ; i++)
     {
         display_block(&GLYPHS[255*8], 15-i, 1);
     }
@@ -211,7 +211,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
     //update ui
 }
 
-byte collide_at(location *loc, int col, int row)
+byte collide_at(location *loc, byte col, byte row)
 {
     // odd collide, even passable, TODO: above 128
     return pgm_read_byte(&loc->map[ loc->width * row + col ]) % 2;

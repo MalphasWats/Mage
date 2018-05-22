@@ -35,10 +35,10 @@ void clear_display(void);
 void display_off(void);
 void display_on(void);
 
-void display_image(const byte *img, int col, int row, int width, int height);
-void display_block(const byte *block, int col, int row);
+void display_image(const byte *img, byte col, byte row, byte width, byte height);
+void display_block(const byte *block, byte col, byte row);
 
-void set_display_row(int row);
-void set_display_col_row(int col, int row);
+void set_display_row(byte row);
+void set_display_col_row(byte col, byte row);
 
 #endif

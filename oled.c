@@ -234,9 +234,9 @@ void display_on(void)
     send_command(0xAF);     // DISPLAYON
 }
 
-void display_image(const byte *img, int col, int row, int width, int height)
+void display_image(const byte *img, byte col, byte row, byte width, byte height)
 {
-    for (int h=0 ; h<height ; h++)
+    for (byte h=0 ; h<height ; h++)
     {
         PORTB &= ~(1 << DC);        // LOW
         
@@ -246,7 +246,7 @@ void display_image(const byte *img, int col, int row, int width, int height)
         
         PORTB |= 1 << DC;           // HIGH
     
-        for (int w=0 ; w<width ; w++)
+        for (byte w=0 ; w<width ; w++)
             shift_out_block(&img[(width * h + w)*8]);
     }
     
@@ -259,7 +259,7 @@ void display_image(const byte *img, int col, int row, int width, int height)
     PORTB |= 1 << DC;           // HIGH
 }
 
-void set_display_row(int row)
+void set_display_row(byte row)
 {
     PORTB &= ~(1 << DC);        // LOW
     
@@ -270,7 +270,7 @@ void set_display_row(int row)
     PORTB |= 1 << DC;           // HIGH
 }
 
-void set_display_col_row(int col, int row)
+void set_display_col_row(byte col, byte row)
 {
     PORTB &= ~(1 << DC);        // LOW
     
@@ -281,7 +281,7 @@ void set_display_col_row(int col, int row)
     PORTB |= 1 << DC;           // HIGH
 }
 
-void display_block(const byte *block, int col, int row)
+void display_block(const byte *block, byte col, byte row)
 {
     PORTB &= ~(1 << DC);        // LOW
     
