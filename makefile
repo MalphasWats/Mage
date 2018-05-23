@@ -8,8 +8,7 @@ DEVDUDE    = t85
 CLOCK      = 8000000
 PROGRAMMER = -c linuxspi -P /dev/spidev0.0
 OBJECTS    = utils.o beep.o oled.o mage.o     # Add more objects for each .c file here
-C_FLAGS    = -Wl,--relax -ffunction-sections -fdata-sections -fno-inline-small-functions
-
+C_FLAGS    = -Wl,--gc-sections -Wl,--relax -ffunction-sections -fdata-sections -fno-inline-small-functions -fpack-struct -fshort-enums -mshort-calls
 # fuse settings:
 # use http://www.engbedded.com/fusecalc
 #FUSES      = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m  # 1mhz
