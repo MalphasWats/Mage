@@ -54,6 +54,7 @@ void shift_out_block(const byte *block)
     byte b;
     for (byte i = 0; i < 8; i++)  
     {
+        // see this: https://gcc.gnu.org/onlinedocs/gcc-4.7.0/gcc/Named-Address-Spaces.html
         b = pgm_read_byte(block+i);
         
         if ( b & (1 << 0) )
