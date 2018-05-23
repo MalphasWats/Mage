@@ -12,7 +12,7 @@ typedef struct mob_type {
     byte hitpoints;
     
     byte attack_damage;
-    byte num_attacks;
+    byte num_actions;
     
     byte tactics; // 00 00 00 00 - 00 = wait, 01 = block, 10 = attack, 11 = reserved
     
