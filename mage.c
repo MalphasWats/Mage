@@ -84,7 +84,6 @@ void battle_mode(mob_type *player, mob_type *opponent)
     byte player_turn = TRUE;
     btn_timer = 0;
     
-    t = millis();
     //clear screen
     clear_display();
     
@@ -174,31 +173,55 @@ void battle_mode(mob_type *player, mob_type *opponent)
         byte opponent_actions = 0;
         
         byte turn=0;
+        byte p_action = 0;
         
         //choose opponent action(s)
         for(int i=0 ; i<opponent->num_actions ; i++)
         {
             opponent_actions |= ((opponent->tactics>>(turn%4)) & 0x03) << i*2;
-            display_block(&GLYPHS[103*8], 7-i, 2);
+            display_block(&GLYPHS[31*8], 7-i, 2);
         }
         
         //await player actions
         while(player_turn)
         {
+            t = millis();
             btn_val = analog_read(ADC2);
             if (btn_timer == 0)
             {
                 if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
                 {
+                    display_block(&GLYPHS[0], cursor.x, cursor.y);
                     cursor.x -= 1;
                     crap_beep(_C5, 5);
                     btn_timer = t;
                 }
                 else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
                 {
+                    display_block(&GLYPHS[0], cursor.x, cursor.y);
                     cursor.x += 1;
                     crap_beep(_C5, 5);
                     btn_timer = t;
+                }
+                else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
+                {
+                    crap_beep(_C5, 5);
+                    
+                    btn_timer = t;
+                    
+                    if (cursor.x == 4)
+                    {
+                        display_block(&GLYPHS[92*8], p_action+6, 4);
+                        p_action += 1;
+                    }
+                    if (cursor.x == 5)
+                    {
+                        display_block(&GLYPHS[94*8], p_action+6, 4);
+                        p_action += 1;
+                    }
+                    
+                    if (p_action == player->num_actions)
+                        player_turn = FALSE;
                 }
                 else if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR)
                 {
@@ -216,16 +239,22 @@ void battle_mode(mob_type *player, mob_type *opponent)
             if (t - btn_timer > BTN_DELAY)
                 btn_timer = 0;
             
-            if (cursor.x < 0)
-                cursor.x = 1;
-            if (cursor.x > 1)
-                cursor.x = 0;
+            if (cursor.x < 4)
+                cursor.x = 5;
+            if (cursor.x > 5)
+                cursor.x = 4;
             
-            // TODO: This doesn't erase itself
             display_block(&GLYPHS[59*8], cursor.x, cursor.y);
         }
         
         //resolve combat
+        crap_beep(_A4, 20);
+        delay_ms(10);
+        crap_beep(_A5, 35);
+        delay_ms(30);
+        crap_beep(_B5, 20);
+        delay_ms(10);
+        crap_beep(_C5, 35);
             
         //show result
         
