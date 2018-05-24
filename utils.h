@@ -15,6 +15,7 @@
 #define ADC3 3  // PB3
 
 typedef unsigned char byte;
+typedef unsigned int word;
 
 typedef struct point {
     byte x;

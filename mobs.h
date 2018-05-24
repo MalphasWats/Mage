@@ -11,10 +11,13 @@ typedef struct mob_type {
     
     byte hitpoints;
     
-    byte attack_damage;
+    byte attack;
+    byte defence;
+    byte damage;
+    
     byte num_actions;
     
-    byte tactics; // 00 00 00 00 - 00 = wait, 01 = block, 10 = attack, 11 = reserved
+    byte tactics; // 00 00 00 00 - 00 = no action, 01 = block, 10 = attack, 11 = focus
     
     byte dead;
     // aggro_radius, abilities?, hit, block&dodge chance

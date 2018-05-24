@@ -81,7 +81,6 @@ void display_mobs(location *loc)
 void battle_mode(mob_type *player, mob_type *opponent)
 {
     byte in_battle = TRUE;
-    byte player_turn = TRUE;
     btn_timer = 0;
     
     //clear screen
@@ -105,8 +104,8 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+player->num_actions+1, 4);
     
     //TODO: Need to be cleverer about lining these up
-    display_block(&GLYPHS[8*8], 5+player->num_actions-opponent->num_actions, 2);
-    display_block(&GLYPHS[9*8], 5+player->num_actions+1, 2);
+    display_block(&GLYPHS[8*8], 5, 2);
+    display_block(&GLYPHS[9*8], 5+opponent->num_actions+1, 2);
     
     //draw player TODO: scale x2
     //http://tech-algorithm.com/articles/nearest-neighbor-image-scaling/
@@ -145,43 +144,48 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     //draw opponent TODO: scale x2
     display_block(&GLYPHS[opponent->glyph*8], 13, 2);
-    
-    //draw available actions
-    display_block(&GLYPHS[92*8], 4, 6);
-    display_block(&GLYPHS[94*8], 5, 6);
 
+    byte turn=0;
     while(in_battle)
     {
         //update countdown
         
         /* Display player health */
-        for(byte i=0 ; i<player->hitpoints/2 ; i++)
-            display_block(&GLYPHS[255*8], 0+i, 5);
-        
-        if (player->hitpoints%2)
-            display_block(&GLYPHS[253*8], 0+(player->hitpoints/2), 5);
+        for(byte i=0 ; i<((player->hitpoints & 0xf0) >> 4) ; i++)
+        {
+            if( i >= (player->hitpoints & 0x0f) )
+                display_block(&GLYPHS[254*8], 0+i, 5);
+            else
+                display_block(&GLYPHS[255*8], 0+i, 5);
+        }
         
         /* Display opponent health */
-        for(byte i=0 ; i<opponent->hitpoints/2 ; i++)
-            display_block(&GLYPHS[255*8], 15-i, 1);
-        
-        if (opponent->hitpoints%2)
-            display_block(&GLYPHS[254*8], 15-(opponent->hitpoints/2), 1);
+        for(byte i=0 ; i<((opponent->hitpoints & 0xf0) >> 4) ; i++)
+        {
+            if( i >= (opponent->hitpoints & 0x0f) )
+                display_block(&GLYPHS[254*8], 15-i, 1);
+            else
+                display_block(&GLYPHS[255*8], 15-i, 1);
+        }
 
-        point cursor={.x=4, .y=7};
-        //byte player_actions = 0;
-        byte opponent_actions = 0;
+        byte cursor = 0;
+        word player_actions = 0;
+        word opponent_actions = 0;
         
-        byte turn=0;
         byte p_action = 0;
         
         //choose opponent action(s)
-        for(int i=0 ; i<opponent->num_actions ; i++)
+        for(byte i=0 ; i<opponent->num_actions ; i++)
         {
-            opponent_actions |= ((opponent->tactics>>(turn%4)) & 0x03) << i*2;
-            display_block(&GLYPHS[31*8], 7-i, 2);
+            opponent_actions |= ((opponent->tactics>>((turn%4)*2)) & 0x03) << (i*2);
+            display_block(&GLYPHS[238*8], 6+i, 2);
         }
         
+        // Clear player actions
+        for(byte i=0 ; i<player->num_actions ; i++)
+            display_block(&GLYPHS[0], 6+i, 4);
+        
+        byte player_turn = TRUE;
         //await player actions
         while(player_turn)
         {
@@ -191,15 +195,15 @@ void battle_mode(mob_type *player, mob_type *opponent)
             {
                 if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
                 {
-                    display_block(&GLYPHS[0], cursor.x, cursor.y);
-                    cursor.x -= 1;
+                    //display_block(&GLYPHS[0], cursor.x, cursor.y);
+                    cursor -= 1;
                     crap_beep(_C5, 5);
                     btn_timer = t;
                 }
                 else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
                 {
-                    display_block(&GLYPHS[0], cursor.x, cursor.y);
-                    cursor.x += 1;
+                    //display_block(&GLYPHS[0], cursor.x, cursor.y);
+                    cursor += 1;
                     crap_beep(_C5, 5);
                     btn_timer = t;
                 }
@@ -209,14 +213,22 @@ void battle_mode(mob_type *player, mob_type *opponent)
                     
                     btn_timer = t;
                     
-                    if (cursor.x == 4)
+                    if (cursor == 0)
                     {
-                        display_block(&GLYPHS[92*8], p_action+6, 4);
+                        display_block(&GLYPHS[239*8], p_action+6, 4);
+                        player_actions |= 0b10 << (p_action*2);
                         p_action += 1;
                     }
-                    if (cursor.x == 5)
+                    else if (cursor == 1)
                     {
-                        display_block(&GLYPHS[94*8], p_action+6, 4);
+                        display_block(&GLYPHS[240*8], p_action+6, 4);
+                        player_actions |= 0b01 << (p_action*2);
+                        p_action += 1;
+                    }
+                    else if (cursor == 2)
+                    {
+                        display_block(&GLYPHS[241*8], p_action+6, 4);
+                        player_actions |= 0b11 << (p_action*2);
                         p_action += 1;
                     }
                     
@@ -239,12 +251,24 @@ void battle_mode(mob_type *player, mob_type *opponent)
             if (t - btn_timer > BTN_DELAY)
                 btn_timer = 0;
             
-            if (cursor.x < 4)
-                cursor.x = 5;
-            if (cursor.x > 5)
-                cursor.x = 4;
+            if (cursor == 255)
+                cursor = 2;
+            if (cursor > 2)
+                cursor = 0;
             
-            display_block(&GLYPHS[59*8], cursor.x, cursor.y);
+            if (p_action < player->num_actions)
+                display_block(&GLYPHS[237*8], 6+p_action, 4);
+            
+            //display_block(&GLYPHS[59*8], cursor.x, cursor.y);
+            for (byte i=0 ; i<3 ; i++)
+            {
+                //draw available actions
+                if (i == cursor)
+                    display_block(&GLYPHS[(239+i+3)*8], 4+i, 6);
+                else
+                    display_block(&GLYPHS[(239+i)*8], 4+i, 6);
+            }
+            
         }
         
         //resolve combat
@@ -255,10 +279,82 @@ void battle_mode(mob_type *player, mob_type *opponent)
         crap_beep(_B5, 20);
         delay_ms(10);
         crap_beep(_C5, 35);
+             
+        byte p_attack_mod = 0;
+        byte p_defence_mod = 0;
+        byte o_attack_mod = 0;
+        byte o_defence_mod = 0;
+        
+        for(byte i=0 ; i<4 ; i++)
+        {
+            byte pa = (player_actions >> (i*2)) & 0x0003;
+            if (pa == 1)
+                p_defence_mod += 3;
+            if (pa == 3)
+                p_attack_mod += 3;
+            
+            
+            byte oa = (opponent_actions >> (i*2)) & 0x0003;
+            if (oa == 1)
+            {
+                o_defence_mod += 3;
+                display_block(&GLYPHS[240*8], 6+i, 2);
+            }
+            if (oa == 3)
+            {
+                o_attack_mod += 3;
+                display_block(&GLYPHS[241*8], 6+i, 2);
+            }
+            
+            if (pa == 2)
+            {
+                //int roll = (rng() % 20) + player->attack + p_attack_mod;
+                if ( (rng() % 20) + player->attack + p_attack_mod > opponent->defence + o_defence_mod)
+                //if ( roll > opponent->defence + o_defence_mod)
+                {
+                    if (player->damage >= (opponent->hitpoints & 0x0f))
+                    {
+                        opponent->hitpoints = opponent->hitpoints & 0xf0;
+                        opponent->dead = TRUE;
+                        opponent->glyph = 91;
+                    }
+                    else
+                    {
+                        opponent->hitpoints -= player->damage;
+                    }
+                }
+            }
+            
+            if (oa == 2)
+            {
+                display_block(&GLYPHS[239*8], 6+i, 2);
+                if ( (rng() % 20) + opponent->attack + o_attack_mod > player->defence + p_defence_mod)
+                {
+                    if (opponent->damage >= (player->hitpoints & 0x0f))
+                    {
+                        player->hitpoints = player->hitpoints & 0xf0;
+                        player->dead = TRUE;
+                        player->glyph = 91;
+                    }
+                    else
+                        player->hitpoints -= opponent->damage;
+                    
+                }
+            }
+            
+            if(opponent->dead || player->dead)
+            {
+                in_battle = FALSE;
+                break;
+            }
+        }
             
         //show result
+        delay_ms(200);
         
         turn += 1;
+        p_action = 0;
+        //opponent_actions = 0;
     }
 }
 
@@ -302,8 +398,10 @@ int main (void)
         .glyph = (PLAYER_OFFSET+7),   // Blob
         .position = {.x=16, .y=13},
     
-        .hitpoints = 2,
-        .attack_damage = 1,
+        .hitpoints = (4<<4) | 4,
+        .damage = 1,
+        .attack = 0,
+        .defence = 5,
         .num_actions = 1,
         
         .tactics = 0b10101010, // blobs just attack
@@ -317,8 +415,10 @@ int main (void)
         .glyph = PLAYER_OFFSET,
         .position = current_location->portal_in,
     
-        .hitpoints = 5,
-        .attack_damage = 2,
+        .attack = 1,
+        .defence = 6,
+        .hitpoints = (3<<4) | 3,
+        .damage = 2,
         .num_actions = 2,
         
         .tactics = 0, // Not applicable to player
@@ -335,6 +435,7 @@ int main (void)
         //display_hud(btn_val);
         if (btn_timer == 0)
         {
+            rng(); // cycle the rng to try to get different values
             if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
             {
                 if (!collide_at(current_location, player.position.x-1, player.position.y))
@@ -469,19 +570,25 @@ int main (void)
         }
         
         display_player(&player);
+        if (player.dead)
+        {
+            //display something sad
+            for(ever) {}
+        }
         
         mob_type *opponent = update_mobs(current_location, &player);
         
-        if (opponent != 0)
+        if (opponent != 0 && !opponent->dead)
         {
             crap_beep(_A4, 20);
             delay_ms(10);
             crap_beep(_A5, 35);
             battle_mode(&player, opponent);
+            
+            map_dirty = TRUE;
         }
         
         display_mobs(current_location);
-        
         //delta = millis() - t;
         //display_hud(delta);
     }
