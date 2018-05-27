@@ -17,9 +17,9 @@
 #define _DOWN   852
 #define _LEFT   930
 #define _RIGHT  610 //678
-#define _A      514
-#define _B      312
-#define _C      254
+#define _A      512
+#define _B      322
+#define _C      255
 #define _D      1021
 
 #define ADC_VAR 2
