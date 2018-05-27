@@ -78,6 +78,34 @@ void display_mobs(location *loc)
     }
 }
 
+void display_window(point top_left, byte width, byte height)
+{
+    byte b = 0;
+    for(byte y=0 ; y<height ; y++)
+    {
+        for(byte x=0 ; x<width ; x++)
+        {
+            if(x==0 && y==0)
+                b=245;
+            else if(x==width-1 && y==0)
+                b=246;
+            else if(x==0 && y==height-1)
+                b=247;
+            else if(x==width-1 && y==height-1)
+                b=248;
+            else if(y==0 || y==height-1)
+                b=249;
+            else if(x==0 || x==width-1)
+                b=250;
+            else
+                b=0; // space!
+            
+            display_block(&GLYPHS[b*8], x+top_left.x, y+top_left.y);
+                
+        }
+    }
+}
+
 void battle_mode(mob_type *player, mob_type *opponent)
 {
     byte in_battle = TRUE;
@@ -534,7 +562,10 @@ int main (void)
                     
                 crap_beep(_A9, 5);
                 
-                btn_timer = t;
+                display_window((point){2, 2}, 5, 4);
+                
+                while(analog_read(ADC2) > 50){}
+                //btn_timer = t;
             }
         }
         
