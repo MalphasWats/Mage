@@ -82,7 +82,7 @@ static const byte HOUSE[] PROGMEM = {
 };
 
 location house = { 
-    .portal_in={.x=4, .y=7}, 
+    .portal_in={.x=7, .y=4}, 
     .portal_out={.x=8, .y=7}, 
     .map=&HOUSE[0],
     .width=16,
