@@ -5,7 +5,6 @@
 #include "glyphs.h"
 #include "beep.h"
 
-//byte HUD[4] = {0x00, 0x00, 0x00, 0x00};
 unsigned int btn_timer = 0;
 int btn_val = 0;
 
@@ -20,7 +19,7 @@ void display_map(location *loc)
     
     for (row=0 ; row<SCREEN_ROWS ; row++)
     {
-        set_display_row(row);
+        set_display_col_row(0, row);
         for (col=0 ; col<SCREEN_COLUMNS ; col++)
         {
             i = loc->width * (viewport_row+row) + (viewport_col+col);
@@ -57,7 +56,7 @@ mob_type *update_mobs(location *loc, mob_type *player)
             {
                 return loc->mobs[i];
             }
-            // update the mob
+            //TODO: update the mob
         }
     }
     return 0;
@@ -103,6 +102,16 @@ void display_window(point top_left, byte width, byte height)
             display_block(&GLYPHS[b*8], x+top_left.x, y+top_left.y);
                 
         }
+    }
+}
+
+void display_string(const char *str, byte col, byte row)
+{
+    char buffer[16];
+    strcpy_P(buffer, str);
+    for(byte i=0 ; buffer[i] != '\0' ; i++)
+    {
+        display_block(&GLYPHS[(buffer[i]-32)*8], col+i, row);
     }
 }
 
@@ -337,15 +346,17 @@ void battle_mode(mob_type *player, mob_type *opponent)
             
             if (pa == 2)
             {
-                //int roll = (rng() % 20) + player->attack + p_attack_mod;
                 if ( (rng() % 20) + player->attack + p_attack_mod > opponent->defence + o_defence_mod)
-                //if ( roll > opponent->defence + o_defence_mod)
                 {
                     if (player->damage >= (opponent->hitpoints & 0x0f))
                     {
                         opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
                         opponent->glyph = 91;
+                        
+                        display_window((point){3, 2}, 11, 3);
+                        display_string(PSTR("YOU WON"), 4, 3);
+                        delay_ms(220);
                     }
                     else
                     {
@@ -416,7 +427,6 @@ int main (void)
     PORTB |= 1 << DC;           // HIGH
     
     //unsigned int delta = 0;
-    //unsigned int hud_timer = 0;
     
     byte map_dirty = TRUE;
     
@@ -562,7 +572,8 @@ int main (void)
                     
                 crap_beep(_A9, 5);
                 
-                display_window((point){2, 2}, 5, 4);
+                display_window((point){0, 0}, 16, 8);
+                display_string(PSTR("PAUSED"), 5, 1);
                 
                 while(analog_read(ADC2) > 50){}
                 //btn_timer = t;
@@ -604,7 +615,8 @@ int main (void)
         display_player(&player);
         if (player.dead)
         {
-            //display something sad
+            display_window((point){1, 2}, 15, 3);
+            display_string(PSTR("YOU HAVE DIED"), 2, 3);
             for(ever) {}
         }
         
