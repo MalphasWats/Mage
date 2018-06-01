@@ -425,7 +425,6 @@ int main (void)
     
     mob_type mob = {
         .glyph = (PLAYER_OFFSET+7),   // Blob
-        .position = {.x=16, .y=13},
         .position = {.x=10, .y=8},
     
         .hitpoints = (4<<4) | 4,
