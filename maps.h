@@ -5,6 +5,13 @@
 #include "mobs.h"
 
 #define MAX_PORTALS 8
+#define MAX_CONTAINERS 1
+#define CONTAINER_SIZE 6
+
+typedef struct container {
+    const point position;
+    byte items[CONTAINER_SIZE];
+} container;
 
 typedef struct location {
     const point portal_in;
@@ -17,8 +24,12 @@ typedef struct location {
     struct location *portals[MAX_PORTALS];
     mob_type *mobs[MAX_MOBS];
     
+    container *containers[MAX_CONTAINERS];
+    
     struct location *return_to;
 } location; 
+
+
     
 static const byte VILLAGE[] PROGMEM = {
 
@@ -69,6 +80,11 @@ location village = {
     .return_to=0 
 };
 
+container chest = {
+    .position={.x=18, .y=6},
+    .items={102, 103, 92, 93, 95, 96},
+};
+
 
 static const byte HOUSE[] PROGMEM = {
 	  0,   0,   0,   0,  175, 181, 181, 181, 181, 181, 181, 175,   0,   0,   0,   0,
@@ -94,6 +110,9 @@ location house = {
 void build_location_portals()
 {
     village.portals[0] = &house;
+    
+    village.containers[0] = &chest;
+    //village.containers[0]->items[0] = 102;
 }
 
 #endif

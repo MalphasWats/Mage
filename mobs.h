@@ -17,7 +17,7 @@ typedef struct mob_type {
     
     byte num_actions;
     
-    byte tactics; // 00 00 00 00 - 00 = no action, 01 = block, 10 = attack, 11 = focus
+    byte tactics; // 00 00 00 00 - 00 = no action, 01 = attack, 10 = block, 11 = focus
     
     byte dead;
     // aggro_radius, abilities?, hit, block&dodge chance

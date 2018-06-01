@@ -23,7 +23,7 @@ void display_map(location *loc)
         for (col=0 ; col<SCREEN_COLUMNS ; col++)
         {
             i = loc->width * (viewport_row+row) + (viewport_col+col);
-            shift_out_block(&GLYPHS[pgm_read_byte(&loc->map[ i ])*8]);
+            shift_out_block(&GLYPHS[pgm_read_byte(&loc->map[ i ])*8], FALSE);
         }
     }
 }
@@ -113,6 +113,93 @@ void display_string(const char *str, byte col, byte row)
     {
         display_block(&GLYPHS[(buffer[i]-32)*8], col+i, row);
     }
+}
+
+int display_item_window(point top_left, byte *items, byte num_items, byte width, byte multi_choices)
+{
+    int selected = 0;
+    
+    byte height = num_items / width;
+    if (num_items % width > 0)
+        height += 1;
+    
+    //display_window((point){5, 4-h}, 6, h+2);
+    byte col = 0;
+    byte row = 0;
+    
+    byte ok = FALSE;
+    
+    char cursor = 0;
+    
+    while(!ok)
+    {
+        t = millis();
+        btn_val = analog_read(ADC2);
+        if (btn_timer == 0)
+        {
+            if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
+            {
+                cursor -= 1;
+                crap_beep(_C5, 5);
+                btn_timer = t;
+            }
+            else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
+            {
+                cursor += 1;
+                crap_beep(_C5, 5);
+                btn_timer = t;
+            }
+            else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR)
+            {
+                cursor -= 4;
+                crap_beep(_C5, 5);
+                btn_timer = t;
+            }
+            else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR)
+            {
+                cursor += 4;
+                crap_beep(_C5, 5);
+                btn_timer = t;
+            }
+            else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
+            {
+                btn_timer = t;
+                if (multi_choices)
+                {
+                    if (cursor == num_items)
+                        ok = TRUE;
+                    else 
+                    {
+                        crap_beep(_C5, 20);
+                        selected ^= 1<<(byte)cursor;
+                    }
+                }
+                else 
+                    return cursor;
+            }
+        }
+        
+        if (t - btn_timer > BTN_DELAY)
+            btn_timer = 0;
+        
+        if (cursor < 0)
+            cursor = 0;
+        if (cursor > num_items)
+            cursor = num_items;
+        
+        for(byte i=0 ; i<height*4 ; i++)
+        {
+            col = i % 4;
+            row = i / 4;
+            if (i<num_items && !(selected & 1<<i))
+                display_block_(&GLYPHS[items[i]*8], top_left.x+col, top_left.y+row, i == cursor);
+            else
+                display_block(&GLYPHS[0], top_left.x+col, top_left.x+row);
+        }
+        if (multi_choices)
+            display_block_(&GLYPHS[multi_choices*8], top_left.x+width-1, top_left.y+height, cursor==num_items);
+    }
+    return selected;
 }
 
 void battle_mode(mob_type *player, mob_type *opponent)
@@ -205,8 +292,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
             else
                 display_block(&GLYPHS[255*8], 15-i, 1);
         }
-
-        byte cursor = 0;
+        
         word player_actions = 0;
         word opponent_actions = 0;
         
@@ -227,86 +313,17 @@ void battle_mode(mob_type *player, mob_type *opponent)
         //await player actions
         while(player_turn)
         {
-            t = millis();
-            btn_val = analog_read(ADC2);
-            if (btn_timer == 0)
-            {
-                if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
-                {
-                    //display_block(&GLYPHS[0], cursor.x, cursor.y);
-                    cursor -= 1;
-                    crap_beep(_C5, 5);
-                    btn_timer = t;
-                }
-                else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
-                {
-                    //display_block(&GLYPHS[0], cursor.x, cursor.y);
-                    cursor += 1;
-                    crap_beep(_C5, 5);
-                    btn_timer = t;
-                }
-                else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
-                {
-                    crap_beep(_C5, 5);
-                    
-                    btn_timer = t;
-                    
-                    if (cursor == 0)
-                    {
-                        display_block(&GLYPHS[239*8], p_action+6, 4);
-                        player_actions |= 0b10 << (p_action*2);
-                        p_action += 1;
-                    }
-                    else if (cursor == 1)
-                    {
-                        display_block(&GLYPHS[240*8], p_action+6, 4);
-                        player_actions |= 0b01 << (p_action*2);
-                        p_action += 1;
-                    }
-                    else if (cursor == 2)
-                    {
-                        display_block(&GLYPHS[241*8], p_action+6, 4);
-                        player_actions |= 0b11 << (p_action*2);
-                        p_action += 1;
-                    }
-                    
-                    if (p_action == player->num_actions)
-                        player_turn = FALSE;
-                }
-                else if (btn_val >= _C-ADC_VAR && btn_val <= _C+ADC_VAR)
-                {
-                    crap_beep(_Gs5, 20);
-                    
-                    btn_timer = t;
-                    
-                    // End battle mode for now
-                    opponent->dead = TRUE;
-                    in_battle = FALSE;
-                    player_turn = FALSE;
-                }
-            }
+            byte a = display_item_window((point){.x=6, .y=6}, (byte[3]){239, 240, 241}, 3, 3, FALSE);
+            display_block(&GLYPHS[(239+a)*8], p_action+6, 4);
+            player_actions |= (a+1) << (p_action*2);
+            p_action += 1;
             
-            if (t - btn_timer > BTN_DELAY)
-                btn_timer = 0;
+            if (p_action == player->num_actions)
+                player_turn = FALSE;
             
-            if (cursor == 255)
-                cursor = 2;
-            if (cursor > 2)
-                cursor = 0;
             
             if (p_action < player->num_actions)
                 display_block(&GLYPHS[237*8], 6+p_action, 4);
-            
-            //display_block(&GLYPHS[59*8], cursor.x, cursor.y);
-            for (byte i=0 ; i<3 ; i++)
-            {
-                //draw available actions
-                if (i == cursor)
-                    display_block(&GLYPHS[(239+i+3)*8], 4+i, 6);
-                else
-                    display_block(&GLYPHS[(239+i)*8], 4+i, 6);
-            }
-            
         }
         
         //resolve combat
@@ -326,14 +343,14 @@ void battle_mode(mob_type *player, mob_type *opponent)
         for(byte i=0 ; i<4 ; i++)
         {
             byte pa = (player_actions >> (i*2)) & 0x0003;
-            if (pa == 1)
+            if (pa == 2)
                 p_defence_mod += 3;
             if (pa == 3)
                 p_attack_mod += 3;
             
             
             byte oa = (opponent_actions >> (i*2)) & 0x0003;
-            if (oa == 1)
+            if (oa == 2)
             {
                 o_defence_mod += 3;
                 display_block(&GLYPHS[240*8], 6+i, 2);
@@ -344,7 +361,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                 display_block(&GLYPHS[241*8], 6+i, 2);
             }
             
-            if (pa == 2)
+            if (pa == 1)
             {
                 if ( (rng() % 20) + player->attack + p_attack_mod > opponent->defence + o_defence_mod)
                 {
@@ -365,7 +382,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                 }
             }
             
-            if (oa == 2)
+            if (oa == 1)
             {
                 display_block(&GLYPHS[239*8], 6+i, 2);
                 if ( (rng() % 20) + opponent->attack + o_attack_mod > player->defence + p_defence_mod)
@@ -443,7 +460,7 @@ int main (void)
         .defence = 5,
         .num_actions = 1,
         
-        .tactics = 0b10101010, // blobs just attack
+        .tactics = 0b01010101, // blobs just attack
     
         .dead = FALSE,
     };
@@ -520,6 +537,7 @@ int main (void)
             }
             else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
             {
+                btn_timer = t;
                 if (player.position.x == current_location->portal_out.x && 
                     player.position.y == current_location->portal_out.y &&
                     current_location->return_to != 0)
@@ -546,9 +564,37 @@ int main (void)
                             break;
                         }
                     }
+                    
+                    for (byte i=0 ; i<MAX_CONTAINERS ; i++)
+                    {
+                        if (player.position.x == current_location->containers[i]->position.x && 
+                            player.position.y == current_location->containers[i]->position.y)
+                        {
+                            // Display contents
+                            crap_beep(_A4, 150);
+                            delay_ms(50);
+                            crap_beep(_A5, 100);
+                            display_window((point){5, 2}, 6, 4);
+                            int selected = display_item_window(
+                                            (point){.x=6, .y=3},
+                                            &current_location->containers[i]->items[0], 
+                                            CONTAINER_SIZE,
+                                            4,
+                                            57
+                                           );
+                            
+                            for(byte s=0 ; s<CONTAINER_SIZE ; s++)
+                            {
+                                if (selected & 1<<s)
+                                    current_location->containers[i]->items[s] = 0;
+                            }
+                            
+                            map_dirty = TRUE;
+                            
+                            break;
+                        }
+                    }
                 }
-                
-                btn_timer = t;
             }
             else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR)
             {
@@ -573,7 +619,12 @@ int main (void)
                 crap_beep(_A9, 5);
                 
                 display_window((point){0, 0}, 16, 8);
-                display_string(PSTR("PAUSED"), 5, 1);
+                display_string(PSTR("PAUSED"), 5, 0);
+                
+                //TODO: Display pause screen
+                //Player Health / Mana
+                //Player Level / XP (when implemented)
+                //Player kills? maybe
                 
                 while(analog_read(ADC2) > 50){}
                 //btn_timer = t;

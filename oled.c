@@ -49,13 +49,15 @@ void shift_out(byte val, byte order)
 }
 
 /* Un-rolling the loop makes this much faster */
-void shift_out_block(const byte *block)
+void shift_out_block(const byte *block, byte inverted)
 {
     byte b;
     for (byte i = 0; i < 8; i++)  
     {
         // see this: https://gcc.gnu.org/onlinedocs/gcc-4.7.0/gcc/Named-Address-Spaces.html
         b = pgm_read_byte(block+i);
+        if (inverted)
+            b = ~b;
         
         if ( b & (1 << 0) )
         {
@@ -210,7 +212,7 @@ void clear_display(void)
         
         for (byte col=0 ; col<SCREEN_COLUMNS ; col++)
         {
-            shift_out_block(&BLANK[0]);
+            shift_out_block(&BLANK[0], FALSE);
         }
     }
 }
@@ -236,7 +238,7 @@ void display_image(const byte *img, byte col, byte row, byte width, byte height)
         set_display_col_row(col, row+h);
         
         for (byte w=0 ; w<width ; w++)
-            shift_out_block(&img[(width * h + w)*8]);
+            shift_out_block(&img[(width * h + w)*8], FALSE);
     }
 }
 
@@ -259,5 +261,11 @@ void set_display_col_row(byte col, byte row)
 void display_block(const byte *block, byte col, byte row)
 {
     set_display_col_row(col, row);
-    shift_out_block(block);
+    shift_out_block(block, FALSE);
+}
+
+void display_block_(const byte *block, byte col, byte row, byte inverted)
+{
+    set_display_col_row(col, row);
+    shift_out_block(block, inverted);
 }
