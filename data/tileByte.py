@@ -1,8 +1,8 @@
 from PIL import Image
 
-MAP = "house"
+MAP = "small-village"
 
-im = Image.open("interface.png")
+im = Image.open("tiles.png")
 pixels = list(im.getdata())
 
 def extract_block(offsetX, offsetY):
@@ -24,7 +24,7 @@ for y in range(im.size[1]//8):
         b = extract_block(x, y)
         glyphs.append(b)
 
-f = open('interface.txt', 'w')
+f = open('tiles.txt', 'w')
 for g in glyphs:
     f.write('\t')
     f.write(g)
@@ -32,7 +32,7 @@ for g in glyphs:
 
 f.close()
 im.close()
-exit()
+#exit()
 f = open('{}.txt'.format(MAP), 'w')
 im = Image.open('{}.png'.format(MAP))
 
@@ -53,11 +53,11 @@ for y in range(im.size[1]//8):
             print("Tile not found: {}, {}".format(x, y))
 
 while len(tiles) > 0:
-    row = tiles[0:32]
-    tiles = tiles[32:]
+    row = tiles[0:20]
+    tiles = tiles[20:]
     line = """
-\t{:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3},
-\t{:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3},
+\t{:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, 
+\t{:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3}, {:>3},
 """
     f.write(line.format(*row))
 
