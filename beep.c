@@ -16,3 +16,8 @@ void crap_beep(unsigned int note, unsigned int dur)
         delay_us(note);
     }
 }
+
+void click( void )
+{
+    crap_beep(_A9, 15);
+}

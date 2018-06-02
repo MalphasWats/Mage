@@ -25,5 +25,6 @@
 #define _A9    71/2  // 14080hz             X
 
 void crap_beep(unsigned int note, unsigned int dur);
+void click( void );
 
 #endif

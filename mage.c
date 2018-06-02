@@ -39,12 +39,12 @@ void display_hud(unsigned int value)
     delay_ms(50);
 }
 
-void display_player(mob_type *player)
+/*void display_player(mob_type *player)
 {
     display_block(&GLYPHS[player->glyph*8], player->position.x-viewport_col, (player->position.y-viewport_row));
-}
+}*/
 
-mob_type *update_mobs(location *loc, mob_type *player)
+/*mob_type *update_mobs(location *loc, mob_type *player)
 {
     for(byte i=0 ; i<MAX_MOBS ; i++)
     {
@@ -60,9 +60,9 @@ mob_type *update_mobs(location *loc, mob_type *player)
         }
     }
     return 0;
-}
+}*/
 
-void display_mobs(location *loc)
+/*void display_mobs(location *loc)
 {
     for(byte i=0 ; i<MAX_MOBS ; i++)
     {
@@ -75,7 +75,7 @@ void display_mobs(location *loc)
             }
         }
     }
-}
+}*/
 
 void display_window(point top_left, byte width, byte height)
 {
@@ -140,25 +140,25 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
             if (btn_val >= _LEFT-ADC_VAR && btn_val <= _LEFT+ADC_VAR)
             {
                 cursor -= 1;
-                crap_beep(_C5, 5);
+                click();
                 btn_timer = t;
             }
             else if (btn_val >= _RIGHT-ADC_VAR && btn_val <= _RIGHT+ADC_VAR)
             {
                 cursor += 1;
-                crap_beep(_C5, 5);
+                click();
                 btn_timer = t;
             }
             else if (btn_val >= _UP-ADC_VAR && btn_val <= _UP+ADC_VAR)
             {
                 cursor -= 4;
-                crap_beep(_C5, 5);
+                click();
                 btn_timer = t;
             }
             else if (btn_val >= _DOWN-ADC_VAR && btn_val <= _DOWN+ADC_VAR)
             {
                 cursor += 4;
-                crap_beep(_C5, 5);
+                click();
                 btn_timer = t;
             }
             else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
@@ -170,7 +170,7 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
                         ok = TRUE;
                     else 
                     {
-                        crap_beep(_C5, 20);
+                        click();
                         selected ^= 1<<(byte)cursor;
                     }
                 }
@@ -184,8 +184,15 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
         
         if (cursor < 0)
             cursor = 0;
-        if (cursor > num_items)
+        else if (cursor > num_items)
             cursor = num_items;
+        
+        if (multi_choices)
+            display_block_(&GLYPHS[multi_choices*8], top_left.x+width-1, top_left.y+height, cursor==num_items);
+        else {
+            if (cursor >= num_items)
+                cursor = num_items-1;
+        }
         
         for(byte i=0 ; i<height*4 ; i++)
         {
@@ -196,10 +203,47 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
             else
                 display_block(&GLYPHS[0], top_left.x+col, top_left.x+row);
         }
-        if (multi_choices)
-            display_block_(&GLYPHS[multi_choices*8], top_left.x+width-1, top_left.y+height, cursor==num_items);
+        
     }
     return selected;
+}
+
+//http://tech-algorithm.com/articles/nearest-neighbor-image-scaling/
+void display_block_embiggened(byte glyph, point top_left)
+{
+    byte block[8];
+    word buffer[16] = {0}; // Initialise to zero
+    
+    for(byte i=0 ; i<8 ; i++)
+        block[i] = pgm_read_byte(&GLYPHS[glyph*8]+i);
+    
+    //unsigned long x_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
+    //unsigned long y_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
+    
+    byte x2;
+    byte y2;
+    for (byte i=0;i<16;i++) 
+    {
+        for (byte j=0;j<16;j++) 
+        {
+            x2 = (byte)((j*32769)>>16) ;
+            y2 = (byte)((i*32769)>>16) ;
+            if (block[y2] & (1 << x2))
+                buffer[i] |= 1 << j;
+        }
+    }
+    
+    set_display_col_row(top_left.x, top_left.y);
+    for (byte i=0 ; i<16 ; i++)
+    {
+        shift_out((buffer[i] >> 8), LSBFIRST);
+    }
+    
+    set_display_col_row(top_left.x, top_left.y+1);
+    for (byte i=0 ; i<16 ; i++)
+    {
+        shift_out((buffer[i] & 0xff), LSBFIRST);
+    }
 }
 
 void battle_mode(mob_type *player, mob_type *opponent)
@@ -232,43 +276,12 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block(&GLYPHS[9*8], 5+opponent->num_actions+1, 2);
     
     //draw player TODO: scale x2
-    //http://tech-algorithm.com/articles/nearest-neighbor-image-scaling/
-    /*byte glyph[8];
-    for (int i=0 ; i<8 ; i++)
-        glyph[i] = pgm_read_byte(&GLYPHS[player->glyph]+i);
-    
-    unsigned int buffer[8*2];
-    unsigned long x_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
-    unsigned long y_ratio = 32769;//(unsigned long)((8<<16)/16) +1;
-    
-    unsigned int x2;
-    unsigned int y2;
-    for (unsigned int i=0;i<16;i++) 
-    {
-        for (unsigned int j=0;j<16;j++) 
-        {
-            x2 = (unsigned int)((j*x_ratio)>>16) ;
-            y2 = (unsigned int)((i*y_ratio)>>16) ;
-            if (glyph[y2] & (1 << x2))
-                buffer[i] |= 1 << j;
-        }                
-    }
-    
-    set_display_col_row(1, 6);
-    for (byte i=0 ; i<16 ; i++)
-    {
-        shift_out((byte)buffer[i] >> 8, LSBFIRST);
-    }
-    
-    set_display_col_row(1, 7);
-    for (byte i=0 ; i<16 ; i++)
-    {
-        shift_out((byte)buffer[i] & 0x0f, LSBFIRST);
-    }*/
-    display_block(&GLYPHS[player->glyph*8], 1, 6);
+    //display_block(&GLYPHS[player->glyph*8], 1, 6);
+    display_block_embiggened(player->glyph, (point){.x=1, .y=6});
     
     //draw opponent TODO: scale x2
-    display_block(&GLYPHS[opponent->glyph*8], 13, 2);
+    //display_block(&GLYPHS[opponent->glyph*8], 13, 2);
+    display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
 
     byte turn=0;
     while(in_battle)
@@ -345,29 +358,15 @@ void battle_mode(mob_type *player, mob_type *opponent)
             byte pa = (player_actions >> (i*2)) & 0x0003;
             if (pa == 2)
                 p_defence_mod += 3;
-            if (pa == 3)
+            else if (pa == 3)
                 p_attack_mod += 3;
-            
-            
-            byte oa = (opponent_actions >> (i*2)) & 0x0003;
-            if (oa == 2)
-            {
-                o_defence_mod += 3;
-                display_block(&GLYPHS[240*8], 6+i, 2);
-            }
-            if (oa == 3)
-            {
-                o_attack_mod += 3;
-                display_block(&GLYPHS[241*8], 6+i, 2);
-            }
-            
-            if (pa == 1)
+            else if (pa == 1)
             {
                 if ( (rng() % 20) + player->attack + p_attack_mod > opponent->defence + o_defence_mod)
                 {
                     if (player->damage >= (opponent->hitpoints & 0x0f))
                     {
-                        opponent->hitpoints = opponent->hitpoints & 0xf0;
+                        //opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
                         opponent->glyph = 91;
                         
@@ -376,10 +375,21 @@ void battle_mode(mob_type *player, mob_type *opponent)
                         delay_ms(220);
                     }
                     else
-                    {
                         opponent->hitpoints -= player->damage;
-                    }
                 }
+            }
+            
+            
+            byte oa = (opponent_actions >> (i*2)) & 0x0003;
+            if (oa == 2)
+            {
+                o_defence_mod += 3;
+                display_block(&GLYPHS[240*8], 6+i, 2);
+            }
+            else if (oa == 3)
+            {
+                o_attack_mod += 3;
+                display_block(&GLYPHS[241*8], 6+i, 2);
             }
             
             if (oa == 1)
@@ -389,7 +399,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                 {
                     if (opponent->damage >= (player->hitpoints & 0x0f))
                     {
-                        player->hitpoints = player->hitpoints & 0xf0;
+                        //player->hitpoints = player->hitpoints & 0xf0;
                         player->dead = TRUE;
                         player->glyph = 91;
                     }
@@ -498,7 +508,7 @@ int main (void)
                 {
                     player.position.x -= 1;
                     map_dirty = TRUE;
-                    crap_beep(_A9, 5);
+                    click();
                 }
                 
                 btn_timer = t;
@@ -509,7 +519,7 @@ int main (void)
                 {
                     player.position.x += 1;
                     map_dirty = TRUE;
-                    crap_beep(_A9, 5);
+                    click();
                 }
                 btn_timer = t;
             }
@@ -519,7 +529,7 @@ int main (void)
                 {
                     player.position.y -= 1;
                     map_dirty = TRUE;
-                    crap_beep(_A9, 5);
+                    click();
                 }
                 
                 btn_timer = t;
@@ -530,7 +540,7 @@ int main (void)
                 {
                     player.position.y += 1;
                     map_dirty = TRUE;
-                    crap_beep(_A9, 5);
+                    click();
                 }
                 
                 btn_timer = t;
@@ -545,7 +555,7 @@ int main (void)
                     player.position = current_location->portal_in;
                     current_location = current_location->return_to;
                     map_dirty = TRUE;
-                    crap_beep(_A9, 5);
+                    click();
                 }
                 else 
                 {
@@ -559,7 +569,7 @@ int main (void)
                             player.position.y = current_location->portal_out.y;
                             
                             map_dirty = TRUE;
-                            crap_beep(_A9, 5);
+                            click();
                             
                             break;
                         }
@@ -600,7 +610,7 @@ int main (void)
             {
                 map_dirty = TRUE;
                 
-                crap_beep(_A9, 5);
+                click();
                 
                 btn_timer = t;
             }
@@ -608,7 +618,7 @@ int main (void)
             {
                 map_dirty = TRUE;
                     
-                crap_beep(_A9, 5);
+                click();
                 
                 btn_timer = t;
             }
@@ -616,7 +626,7 @@ int main (void)
             {
                 map_dirty = TRUE;
                     
-                crap_beep(_A9, 5);
+                click();
                 
                 display_window((point){0, 0}, 16, 8);
                 display_string(PSTR("PAUSED"), 5, 0);
@@ -663,7 +673,8 @@ int main (void)
             map_dirty = FALSE;
         }
         
-        display_player(&player);
+        //display_player(&player);
+        display_block(&GLYPHS[player.glyph*8], player.position.x-viewport_col, (player.position.y-viewport_row));
         if (player.dead)
         {
             display_window((point){1, 2}, 15, 3);
@@ -671,9 +682,29 @@ int main (void)
             for(ever) {}
         }
         
-        mob_type *opponent = update_mobs(current_location, &player);
+        mob_type *opponent = 0; //update_mobs(current_location, &player);
+        for(byte i=0 ; i<MAX_MOBS ; i++)
+        {
+            if (current_location->mobs[i])
+            {
+                //TODO: update the mob
+                
+                if (current_location->mobs[i]->position.x >= viewport_col && current_location->mobs[i]->position.x < viewport_col+SCREEN_COLUMNS && 
+                    current_location->mobs[i]->position.y >= viewport_row && current_location->mobs[i]->position.y < viewport_row+SCREEN_ROWS )
+                {
+                    display_block(&GLYPHS[current_location->mobs[i]->glyph*8], current_location->mobs[i]->position.x-viewport_col, (current_location->mobs[i]->position.y-viewport_row));
+                }
+                if (current_location->mobs[i]->position.x == player.position.x && 
+                    current_location->mobs[i]->position.y == player.position.y &&
+                    !current_location->mobs[i]->dead)
+                {
+                    opponent = current_location->mobs[i];
+                    break;
+                }
+            }
+        }
         
-        if (opponent != 0 && !opponent->dead)
+        if (opponent != 0)// && !opponent->dead)
         {
             crap_beep(_A4, 20);
             delay_ms(10);
@@ -683,7 +714,19 @@ int main (void)
             map_dirty = TRUE;
         }
         
-        display_mobs(current_location);
+        //display_mobs(current_location);
+        /*for(byte i=0 ; i<MAX_MOBS ; i++)
+        {
+            if (current_location->mobs[i])
+            {
+                if (current_location->mobs[i]->position.x >= viewport_col && current_location->mobs[i]->position.x < viewport_col+SCREEN_COLUMNS && 
+                    current_location->mobs[i]->position.y >= viewport_row && current_location->mobs[i]->position.y < viewport_row+SCREEN_ROWS )
+                {
+                    display_block(&GLYPHS[current_location->mobs[i]->glyph*8], current_location->mobs[i]->position.x-viewport_col, (current_location->mobs[i]->position.y-viewport_row));
+                }
+            }
+        }*/
+        
         //delta = millis() - t;
         //display_hud(delta);
     }
