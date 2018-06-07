@@ -1,4 +1,4 @@
-update=24/04/2018 10:20:28
+update=06/06/2018 12:12:54
 version=1
 last_client=kicad
 [pcbnew]
@@ -61,4 +61,4 @@ LibName29=opto
 LibName30=atmel
 LibName31=contrib
 LibName32=valves
-LibName33=D:/Dropbox/projects/KiCad Library/Custom Library
+LibName33=D:/Dropbox/KiCad Library/Custom Library
