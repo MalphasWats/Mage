@@ -30,7 +30,7 @@ typedef struct mob_type {
 } mob_type;
 
 #define BLOB  0
-#define DWARF 1
+#define GNOME 1
 
 mob_type MOBS[] = {
     (mob_type) {
@@ -49,7 +49,7 @@ mob_type MOBS[] = {
     },
     
     (mob_type) {
-        .glyph = 63,   // Dwarf
+        .glyph = 63,   // Gnome
         .position = {.x=0, .y=0},
     
         .hitpoints = (6<<4) | 6,
@@ -58,7 +58,7 @@ mob_type MOBS[] = {
         .defence = 7,
         .num_actions = 2,
         
-        .tactics = 0b10011001, // Dwarfs defend/attack
+        .tactics = 0b10011001, // Gnomes defend/attack
     
         .dead = FALSE,
     },
