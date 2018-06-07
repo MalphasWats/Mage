@@ -5,6 +5,12 @@
 
 #define MAX_MOBS 8
 
+typedef struct item {
+    byte glyph;
+                        // RESERVED EQUIPPABLE EQUIPPED CONSUMABLE ATK DEF DAM HP MAN  VALUE
+    word attributes;    //  0000      0          0        0         0   0   0   0  0   0000
+} item;
+
 typedef struct mob_type {
     byte glyph;
     point position;
@@ -21,6 +27,42 @@ typedef struct mob_type {
     
     byte dead;
     // aggro_radius, abilities?, hit, block&dodge chance
-} mob_type; 
+} mob_type;
+
+#define BLOB  0
+#define DWARF 1
+
+mob_type MOBS[] = {
+    (mob_type) {
+        .glyph = 67,   // Blob
+        .position = {.x=0, .y=0},
+    
+        .hitpoints = (4<<4) | 4,
+        .damage = 1,
+        .attack = 0,
+        .defence = 5,
+        .num_actions = 1,
+        
+        .tactics = 0b01010101, // blobs just attack
+    
+        .dead = FALSE,
+    },
+    
+    (mob_type) {
+        .glyph = 63,   // Dwarf
+        .position = {.x=0, .y=0},
+    
+        .hitpoints = (6<<4) | 6,
+        .damage = 2,
+        .attack = 1,
+        .defence = 7,
+        .num_actions = 2,
+        
+        .tactics = 0b10011001, // Dwarfs defend/attack
+    
+        .dead = FALSE,
+    },
+};
+    
 
 #endif
