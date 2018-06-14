@@ -13,6 +13,8 @@ unsigned int t;
 int viewport_col = 0;
 int viewport_row = 0;
 
+byte cursor = 0;
+
 void display_map(location *loc)
 {   
     int col, row, i;
@@ -124,7 +126,7 @@ byte display_item_window(point top_left, item *items, byte num_items, byte width
     byte col = 0;
     byte row = 0;
     
-    char cursor = 0;
+    //char cursor = 0;
     
     for(ever)
     {
@@ -163,14 +165,15 @@ byte display_item_window(point top_left, item *items, byte num_items, byte width
             }
 			else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR)
             {
-				return 255;
+				cursor = 255;
+				return cursor;
 			}
         }
         
         if (t - btn_timer > BTN_DELAY)
             btn_timer = 0;
         
-        if (cursor < 0)
+        if (cursor > 250)
             cursor = 0;
         else if (cursor >= num_items)
             cursor = num_items-1;
