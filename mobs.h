@@ -6,7 +6,7 @@
 #define MAX_MOBS 8
 
 #define NULL_ITEM (item){.glyph=0, .attributes=0}
-#define APPLE (item){.glyph=113, .attributes=0b0000001000100010}
+#define APPLE (item){.glyph=103, .attributes=0b0000001000100010}
 
 // RESERVED EQUIPPABLE EQUIPPED CONSUMABLE ATK DEF DAM HP MAN  VALUE
 //  0000      0          0        1         0   0   0   1  0   0010
