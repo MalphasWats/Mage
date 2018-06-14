@@ -670,12 +670,12 @@ int main (void)
         if (t - btn_timer > BTN_DELAY)
             btn_timer = 0;
         
-        if (player.position.x < 0)
+        if (player.position.x == 255)
             player.position.x = 0;
         if (player.position.x > current_location->width-1)
             player.position.x = current_location->width-1;
         
-        if (player.position.y < 0)
+        if (player.position.y == 255)
             player.position.y = 0;
         if (player.position.y > current_location->height-1)
             player.position.y = current_location->height-1;
