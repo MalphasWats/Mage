@@ -10,7 +10,7 @@
 
 typedef struct container {
     const point position;
-    items items[CONTAINER_SIZE];
+    item items[CONTAINER_SIZE];
 } container;
 
 typedef struct location {
