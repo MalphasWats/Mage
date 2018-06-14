@@ -104,7 +104,7 @@ void display_window(point top_left, byte width, byte height)
     }
 }
 
-void display_string(const char *str, byte col, byte row)
+/*void display_string(const char *str, byte col, byte row)
 {
     char buffer[16];
     strcpy_P(buffer, str);
@@ -112,7 +112,7 @@ void display_string(const char *str, byte col, byte row)
     {
         display_block(&GLYPHS[(buffer[i]-32)*8], col+i, row);
     }
-}
+}*/
 
 byte display_item_window(point top_left, item *items, byte num_items, byte width)
 {
@@ -358,11 +358,13 @@ void battle_mode(mob_type *player, mob_type *opponent)
                     {
                         //opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
-                        opponent->glyph = 91;
                         
-                        display_window((point){3, 2}, 11, 3);
-                        display_string(PSTR("YOU WON"), 4, 3);
+                        display_window((point){5, 1}, 6, 6);
+                        display_block_embiggened(opponent->glyph, (point){.x=6, .y=2});
                         delay_ms(220);
+						opponent->glyph = 91;
+						display_block_embiggened(opponent->glyph, (point){.x=6, .y=2});
+						delay_ms(220);
                     }
                     else
                         opponent->hitpoints -= player->damage;
@@ -698,8 +700,9 @@ int main (void)
         display_block(&GLYPHS[player.glyph*8], player.position.x-viewport_col, (player.position.y-viewport_row));
         if (player.dead)
         {
-            display_window((point){1, 2}, 15, 3);
-            display_string(PSTR("YOU HAVE DIED"), 2, 3);
+            display_window((point){5, 1}, 6, 6);
+            display_block_embiggened(91, (point){.x=6, .y=2});
+			
             for(ever) {}
         }
         

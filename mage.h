@@ -55,7 +55,7 @@ void display_hud(unsigned int value);
 //mob_type *update_mobs(location *loc, mob_type *player);
 //void display_mobs(location *loc);
 void display_window(point top_left, byte width, byte height);
-void display_string(const char *str, byte col, byte row);
+//void display_string(const char *str, byte col, byte row);
 byte display_item_window(point top_left, item *items, byte num_items, byte width);
 void display_block_embiggened(byte glyph, point top_left);
 void battle_mode(mob_type *player, mob_type *opponent);
