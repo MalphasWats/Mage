@@ -634,16 +634,21 @@ int main (void)
                 click();
 				
 				display_window((point){5, 1}, 6, 6);
-				byte selected = display_item_window(
+				byte selected = 0;
+				cursor = 0;
+				while (selected < 255)
+				{
+					selected = display_item_window(
 								(point){.x=6, .y=2},
 								&inventory[0], 
 								12,
 								4
 							   );
-                if (selected < 255)
-				{
-					//use item if usable
-					click();
+					if (selected < 255)
+					{
+						//use item if usable
+						click();
+					}
 				}
 				
                 btn_timer = t;
