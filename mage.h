@@ -20,7 +20,7 @@
 #define _A      512
 #define _B      322
 #define _C      255
-#define _D      1021
+//#define _D      1021
 
 #define ADC_VAR 2
 

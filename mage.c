@@ -643,7 +643,7 @@ int main (void)
 				
                 btn_timer = t;
             }
-            else if (btn_val >= _D)
+            /*else if (btn_val >= _D)
             {
                 map_dirty = TRUE;
                     
@@ -659,7 +659,7 @@ int main (void)
                 
                 while(analog_read(ADC2) > 50){}
                 //btn_timer = t;
-            }
+            }*/
         }
         
         if (t - btn_timer > BTN_DELAY)
