@@ -100,7 +100,6 @@ void display_window(point top_left, byte width, byte height)
                 b=0; // space!
             
             display_block(&GLYPHS[b*8], x+top_left.x, y+top_left.y);
-                
         }
     }
 }
@@ -115,10 +114,8 @@ void display_string(const char *str, byte col, byte row)
     }
 }
 
-int display_item_window(point top_left, byte *items, byte num_items, byte width, byte multi_choices)
+byte display_item_window(point top_left, item *items, byte num_items, byte width)
 {
-    int selected = 0;
-    
     byte height = num_items / width;
     if (num_items % width > 0)
         height += 1;
@@ -127,11 +124,9 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
     byte col = 0;
     byte row = 0;
     
-    byte ok = FALSE;
-    
     char cursor = 0;
     
-    while(!ok)
+    for(ever)
     {
         t = millis();
         btn_val = analog_read(ADC2);
@@ -163,20 +158,13 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
             }
             else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
             {
-                btn_timer = t;
-                if (multi_choices)
-                {
-                    if (cursor == num_items)
-                        ok = TRUE;
-                    else 
-                    {
-                        click();
-                        selected ^= 1<<(byte)cursor;
-                    }
-                }
-                else 
-                    return cursor;
+				click();
+                return cursor;
             }
+			else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR)
+            {
+				return 255;
+			}
         }
         
         if (t - btn_timer > BTN_DELAY)
@@ -184,28 +172,20 @@ int display_item_window(point top_left, byte *items, byte num_items, byte width,
         
         if (cursor < 0)
             cursor = 0;
-        else if (cursor > num_items)
-            cursor = num_items;
-        
-        if (multi_choices)
-            display_block_(&GLYPHS[multi_choices*8], top_left.x+width-1, top_left.y+height, cursor==num_items);
-        else {
-            if (cursor >= num_items)
-                cursor = num_items-1;
-        }
+        else if (cursor >= num_items)
+            cursor = num_items-1;
         
         for(byte i=0 ; i<height*4 ; i++)
         {
             col = i % 4;
             row = i / 4;
-            if (i<num_items && !(selected & 1<<i))
-                display_block_(&GLYPHS[items[i]*8], top_left.x+col, top_left.y+row, i == cursor);
+            if (i<num_items)
+                display_block_(&GLYPHS[items[i].glyph*8], top_left.x+col, top_left.y+row, i == cursor);
             else
                 display_block(&GLYPHS[0], top_left.x+col, top_left.x+row);
         }
         
     }
-    return selected;
 }
 
 //http://tech-algorithm.com/articles/nearest-neighbor-image-scaling/
@@ -284,6 +264,13 @@ void battle_mode(mob_type *player, mob_type *opponent)
     display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
 
     byte turn=0;
+	
+	item action_list[3] = {
+		(item){.glyph=239, .attributes=0},
+		(item){.glyph=240, .attributes=0},
+		(item){.glyph=241, .attributes=0},
+	};
+	
     while(in_battle)
     {
         //update countdown
@@ -326,7 +313,10 @@ void battle_mode(mob_type *player, mob_type *opponent)
         //await player actions
         while(player_turn)
         {
-            byte a = display_item_window((point){.x=6, .y=6}, (byte[3]){239, 240, 241}, 3, 3, FALSE);
+            //byte a = display_item_window((point){.x=6, .y=6}, (byte[3]){239, 240, 241}, 3, 3, FALSE);
+			byte a = 255;
+			while(a == 255)
+				a = display_item_window((point){.x=6, .y=6}, &action_list[0], 3, 3);
             display_block(&GLYPHS[(239+a)*8], p_action+6, 4);
             player_actions |= (a+1) << (p_action*2);
             p_action += 1;
@@ -460,7 +450,7 @@ int main (void)
     build_location_portals();
     location *current_location = &village;
     
-    mob_type mob = {
+    current_location->mobs[0] = &(mob_type){
         .glyph = (PLAYER_OFFSET+7),   // Blob
         .position = {.x=10, .y=8},
     
@@ -474,8 +464,6 @@ int main (void)
     
         .dead = FALSE,
     };
-    
-    current_location->mobs[0] = &mob;
     
     mob_type player = {
         .glyph = PLAYER_OFFSET,
@@ -491,6 +479,21 @@ int main (void)
     
         .dead = FALSE,
     };
+	
+	item inventory[12];
+	inventory[0] = APPLE;
+	inventory[1] = NULL_ITEM;
+	inventory[2] = NULL_ITEM;
+	inventory[3] = NULL_ITEM;
+	inventory[4] = NULL_ITEM;
+	inventory[5] = NULL_ITEM;
+	inventory[6] = NULL_ITEM;
+	inventory[7] = NULL_ITEM;
+	inventory[8] = NULL_ITEM;
+	inventory[9] = NULL_ITEM;
+	inventory[10] = NULL_ITEM;
+	inventory[11] = NULL_ITEM;
+	
     
     for(ever)
     {
@@ -585,19 +588,24 @@ int main (void)
                             delay_ms(50);
                             crap_beep(_A5, 100);
                             display_window((point){5, 2}, 6, 4);
-                            int selected = display_item_window(
+                            byte selected = display_item_window(
                                             (point){.x=6, .y=3},
                                             &current_location->containers[i]->items[0], 
                                             CONTAINER_SIZE,
-                                            4,
-                                            57
+                                            4
                                            );
-                            
-                            for(byte s=0 ; s<CONTAINER_SIZE ; s++)
-                            {
-                                if (selected & 1<<s)
-                                    current_location->containers[i]->items[s] = 0;
-                            }
+										   
+							if (selected < 255)
+							{
+								for(byte slot=0 ; slot<12 ; slot++)
+								{
+									if (inventory[slot].glyph == 0)
+									{
+										inventory[slot] = current_location->containers[i]->items[selected];
+										current_location->containers[i]->items[selected] = NULL_ITEM;
+									}
+								}
+							}
                             
                             map_dirty = TRUE;
                             
@@ -619,7 +627,20 @@ int main (void)
                 map_dirty = TRUE;
                     
                 click();
-                
+				
+				display_window((point){5, 1}, 6, 6);
+				byte selected = display_item_window(
+								(point){.x=6, .y=2},
+								&inventory[0], 
+								12,
+								4
+							   );
+                if (selected < 255)
+				{
+					//use item if usable
+					click();
+				}
+				
                 btn_timer = t;
             }
             else if (btn_val >= _D)
@@ -699,7 +720,7 @@ int main (void)
                     !current_location->mobs[i]->dead)
                 {
                     opponent = current_location->mobs[i];
-                    break;
+                    break; // TODO: This stops other mobs getting updated
                 }
             }
         }

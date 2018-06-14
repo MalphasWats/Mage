@@ -10,7 +10,7 @@
 
 typedef struct container {
     const point position;
-    byte items[CONTAINER_SIZE];
+    items items[CONTAINER_SIZE];
 } container;
 
 typedef struct location {
@@ -82,7 +82,7 @@ location village = {
 
 container chest = {
     .position={.x=18, .y=6},
-    .items={102, 103, 92, 93, 95, 96},
+    .items={APPLE},
 };
 
 

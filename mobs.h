@@ -5,6 +5,12 @@
 
 #define MAX_MOBS 8
 
+#define NULL_ITEM (item){.glyph=0, .attributes=0}
+#define APPLE (item){.glyph=113, .attributes=0b0000001000100010}
+
+// RESERVED EQUIPPABLE EQUIPPED CONSUMABLE ATK DEF DAM HP MAN  VALUE
+//  0000      0          0        1         0   0   0   1  0   0010
+
 typedef struct item {
     byte glyph;
                         // RESERVED EQUIPPABLE EQUIPPED CONSUMABLE ATK DEF DAM HP MAN  VALUE
@@ -26,43 +32,6 @@ typedef struct mob_type {
     byte tactics; // 00 00 00 00 - 00 = no action, 01 = attack, 10 = block, 11 = focus
     
     byte dead;
-    // aggro_radius, abilities?, hit, block&dodge chance
 } mob_type;
-
-#define BLOB  0
-#define GNOME 1
-
-mob_type MOBS[] = {
-    (mob_type) {
-        .glyph = 67,   // Blob
-        .position = {.x=0, .y=0},
-    
-        .hitpoints = (4<<4) | 4,
-        .damage = 1,
-        .attack = 0,
-        .defence = 5,
-        .num_actions = 1,
-        
-        .tactics = 0b01010101, // blobs just attack
-    
-        .dead = FALSE,
-    },
-    
-    (mob_type) {
-        .glyph = 63,   // Gnome
-        .position = {.x=0, .y=0},
-    
-        .hitpoints = (6<<4) | 6,
-        .damage = 2,
-        .attack = 1,
-        .defence = 7,
-        .num_actions = 2,
-        
-        .tactics = 0b10011001, // Gnomes defend/attack
-    
-        .dead = FALSE,
-    },
-};
-    
 
 #endif
