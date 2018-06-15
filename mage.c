@@ -635,7 +635,7 @@ int main (void)
                     
                 click();
 				
-				display_window((point){5, 1}, 6, 6);
+				display_window((point){5, 1}, 6, 5);
 				byte selected = 0;
 				cursor = 0;
 				while (selected < 255)
@@ -644,7 +644,7 @@ int main (void)
 								(point){.x=6, .y=2},
 								&inventory[0], 
 								12,
-								3
+								4
 							   );
 					if (selected < 255)
 					{
