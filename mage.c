@@ -15,6 +15,12 @@ int viewport_row = 0;
 
 byte cursor = 0;
 
+item combat_actions[] = {
+	(item){.glyph=239, .attributes=0},
+	(item){.glyph=240, .attributes=0},
+	(item){.glyph=241, .attributes=0},
+};
+
 void display_map(location *loc)
 {   
     int col, row, i;
@@ -270,12 +276,6 @@ void battle_mode(mob_type *player, mob_type *opponent)
 
     byte turn=0;
 	
-	item action_list[3] = {
-		(item){.glyph=239, .attributes=0},
-		(item){.glyph=240, .attributes=0},
-		(item){.glyph=241, .attributes=0},
-	};
-	
     while(in_battle)
     {
         //update countdown
@@ -321,7 +321,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
             //byte a = display_item_window((point){.x=6, .y=6}, (byte[3]){239, 240, 241}, 3, 3, FALSE);
 			byte a = 255;
 			while(a == 255)
-				a = display_item_window((point){.x=6, .y=6}, &action_list[0], 3, 3);
+				a = display_item_window((point){.x=6, .y=6}, &combat_actions[0], 3, 3);
             display_block(&GLYPHS[(239+a)*8], p_action+6, 4);
             player_actions |= (a+1) << (p_action*2);
             p_action += 1;
