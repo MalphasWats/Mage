@@ -239,7 +239,6 @@ void display_block_embiggened(byte glyph, point top_left)
 
 void battle_mode(mob_type *player, mob_type *opponent)
 {
-    byte in_battle = TRUE;
     btn_timer = 0;
     
     //clear screen
@@ -276,7 +275,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
 
     byte turn=0;
 	
-    while(in_battle)
+    for(ever)
     {
         //update countdown
         
@@ -297,6 +296,9 @@ void battle_mode(mob_type *player, mob_type *opponent)
             else
                 display_block(&GLYPHS[255*8], 15-i, 1);
         }
+        
+        if(opponent->dead || player->dead)
+            break;
         
         word player_actions = 0;
         word opponent_actions = 0;
@@ -367,6 +369,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                         opponent->glyph = 91;
                         display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
                         delay_ms(1000);
+                        break;
                     }
                     else
                         opponent->hitpoints -= player->damage;
@@ -396,17 +399,12 @@ void battle_mode(mob_type *player, mob_type *opponent)
                         //player->hitpoints = player->hitpoints & 0xf0;
                         player->dead = TRUE;
                         player->glyph = 91;
+                        break;
                     }
                     else
                         player->hitpoints -= opponent->damage;
                     
                 }
-            }
-            
-            if(opponent->dead || player->dead)
-            {
-                in_battle = FALSE;
-                break;
             }
         }
             
