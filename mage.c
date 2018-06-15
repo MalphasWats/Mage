@@ -363,7 +363,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                 {
                     if (player->damage >= (opponent->hitpoints & 0x0f))
                     {
-                        //opponent->hitpoints = opponent->hitpoints & 0xf0;
+                        opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
                         
                         opponent->glyph = 91;
@@ -396,7 +396,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                 {
                     if (opponent->damage >= (player->hitpoints & 0x0f))
                     {
-                        //player->hitpoints = player->hitpoints & 0xf0;
+                        player->hitpoints = player->hitpoints & 0xf0;
                         player->dead = TRUE;
                         player->glyph = 91;
                         break;
