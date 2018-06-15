@@ -364,12 +364,9 @@ void battle_mode(mob_type *player, mob_type *opponent)
                         //opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
                         
-                        display_window((point){5, 2}, 6, 4);
-                        display_block_embiggened(opponent->glyph, (point){.x=7, .y=3});
-                        delay_ms(300);
-						opponent->glyph = 91;
-						display_block_embiggened(opponent->glyph, (point){.x=7, .y=3});
-						delay_ms(800);
+                        opponent->glyph = 91;
+                        display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
+                        delay_ms(1000);
                     }
                     else
                         opponent->hitpoints -= player->damage;
