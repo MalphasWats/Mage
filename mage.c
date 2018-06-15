@@ -161,11 +161,13 @@ byte display_item_window(point top_left, item *items, byte num_items, byte width
             else if (btn_val >= _A-ADC_VAR && btn_val <= _A+ADC_VAR)
             {
 				click();
+				btn_timer = t;
                 return cursor;
             }
 			else if (btn_val >= _B-ADC_VAR && btn_val <= _B+ADC_VAR)
             {
 				cursor = 255;
+				btn_timer = t;
 				return cursor;
 			}
         }
