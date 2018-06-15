@@ -298,7 +298,10 @@ void battle_mode(mob_type *player, mob_type *opponent)
         }
         
         if(opponent->dead || player->dead)
+        {
+            delay_ms(1000);
             break;
+        }
         
         word player_actions = 0;
         word opponent_actions = 0;
@@ -365,11 +368,8 @@ void battle_mode(mob_type *player, mob_type *opponent)
                     {
                         opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
-                        
                         opponent->glyph = 91;
                         display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
-                        delay_ms(1000);
-                        break;
                     }
                     else
                         opponent->hitpoints -= player->damage;
@@ -399,7 +399,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                         player->hitpoints = player->hitpoints & 0xf0;
                         player->dead = TRUE;
                         player->glyph = 91;
-                        break;
+                        display_block_embiggened(player->glyph, (point){.x=1, .y=6});
                     }
                     else
                         player->hitpoints -= opponent->damage;
