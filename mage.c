@@ -644,7 +644,7 @@ int main (void)
 								(point){.x=6, .y=2},
 								&inventory[0], 
 								12,
-								4
+								3
 							   );
 					if (selected < 255)
 					{

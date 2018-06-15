@@ -6,7 +6,7 @@
 
 #define MAX_PORTALS 8
 #define MAX_CONTAINERS 1
-#define CONTAINER_SIZE 6
+#define CONTAINER_SIZE 8
 
 typedef struct container {
     const point position;
