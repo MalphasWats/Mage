@@ -5,6 +5,8 @@
 
 #define MAX_MOBS 8
 
+#define CONSUMABLE  1<<9
+
 #define NULL_ITEM (item){.glyph=0, .attributes=0}
 #define APPLE (item){.glyph=103, .attributes=0b0000001000100010}
 

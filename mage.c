@@ -629,25 +629,38 @@ int main (void)
                 map_dirty = TRUE;
                     
                 click();
-				
-				display_window((point){5, 1}, 6, 5);
-				byte selected = 0;
-				cursor = 0;
-				while (selected < 255)
-				{
-					selected = display_item_window(
-								(point){.x=6, .y=2},
-								&inventory[0], 
-								12,
-								4
-							   );
-					if (selected < 255)
-					{
-						//use item if usable
-						click();
-					}
-				}
-				
+                
+                display_window((point){5, 1}, 6, 5);
+                byte selected = 0;
+                cursor = 0;
+                while (selected < 255)
+                {
+                    for(byte i=0 ; i<((player.hitpoints & 0xf0) >> 4) ; i++)
+                    {
+                        if( i >= (player.hitpoints & 0x0f) )
+                            display_block(&GLYPHS[254*8], 5+i, 0);
+                        else
+                            display_block(&GLYPHS[255*8], 5+i, 0);
+                    }
+                    
+                    selected = display_item_window((point){.x=6, .y=2}, &inventory[0], 12, 4);
+                    if (selected < 255)
+                    {   
+                        if (inventory[selected].attributes & CONSUMABLE)
+                        {
+                            //TODO: if I ever implement mana, need to check here
+                            if ((player.hitpoints & 0x0f) + (inventory[selected].attributes & 0x000f) > player.hitpoints >> 4)
+                                player.hitpoints = player.hitpoints & (player.hitpoints >> 4);
+                            else
+                                player.hitpoints += (inventory[selected].attributes & 0x000f);
+                            
+                            inventory[selected] = NULL_ITEM;
+                        }
+                        //use item if usable
+                        click();
+                    }
+                }
+                
                 btn_timer = t;
             }
             /*else if (btn_val >= _D)
