@@ -16,10 +16,12 @@ int viewport_row = 0;
 byte cursor = 0;
 
 item combat_actions[] = {
-	(item){.glyph=239, .attributes=0},
-	(item){.glyph=240, .attributes=0},
-	(item){.glyph=241, .attributes=0},
+	(item){.glyph=98, .attributes=0},
+	(item){.glyph=99, .attributes=0},
+	(item){.glyph=100, .attributes=0},
 };
+
+item inventory[12];
 
 void display_map(location *loc)
 {   
@@ -36,7 +38,7 @@ void display_map(location *loc)
     }
 }
 
-void display_hud(unsigned int value)
+/*void display_hud(unsigned int value)
 {
     for (byte d=0 ; d<4 ; d++)    // Button Mapping
     {
@@ -45,7 +47,7 @@ void display_hud(unsigned int value)
     }
     
     delay_ms(50);
-}
+}*/
 
 /*void display_player(mob_type *player)
 {
@@ -93,17 +95,17 @@ void display_window(point top_left, byte width, byte height)
         for(byte x=0 ; x<width ; x++)
         {
             if(x==0 && y==0)
-                b=245;
+                b=106;
             else if(x==width-1 && y==0)
-                b=246;
+                b=107;
             else if(x==0 && y==height-1)
-                b=247;
+                b=108;
             else if(x==width-1 && y==height-1)
-                b=248;
+                b=109;
             else if(y==0 || y==height-1)
-                b=249;
+                b=110;
             else if(x==0 || x==width-1)
-                b=250;
+                b=111;
             else
                 b=0; // space!
             
@@ -254,23 +256,21 @@ void battle_mode(mob_type *player, mob_type *opponent)
     
     
     //draw ui
-    display_block(&GLYPHS[32*8], 1, 1);
-    display_block(&GLYPHS[DIGIT_OFFSET*8], 2, 1);
-    display_block(&GLYPHS[DIGIT_OFFSET*8], 3, 1);
+    //display_block(&GLYPHS[32*8], 1, 1);
+    //display_block(&GLYPHS[DIGIT_OFFSET*8], 2, 1);
+    //display_block(&GLYPHS[DIGIT_OFFSET*8], 3, 1);
     
-    display_block(&GLYPHS[8*8], 5, 4);
-    display_block(&GLYPHS[9*8], 5+player->num_actions+1, 4);
+    display_block(&GLYPHS[102*8], 5, 4);
+    display_block(&GLYPHS[103*8], 5+player->num_actions+1, 4);
     
     //TODO: Need to be cleverer about lining these up
-    display_block(&GLYPHS[8*8], 5, 2);
-    display_block(&GLYPHS[9*8], 5+opponent->num_actions+1, 2);
+    display_block(&GLYPHS[102*8], 5, 2);
+    display_block(&GLYPHS[103*8], 5+opponent->num_actions+1, 2);
     
     //draw player TODO: scale x2
-    //display_block(&GLYPHS[player->glyph*8], 1, 6);
     display_block_embiggened(player->glyph, (point){.x=1, .y=6});
     
     //draw opponent TODO: scale x2
-    //display_block(&GLYPHS[opponent->glyph*8], 13, 2);
     display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
 
     byte turn=0;
@@ -283,18 +283,18 @@ void battle_mode(mob_type *player, mob_type *opponent)
         for(byte i=0 ; i<((player->hitpoints & 0xf0) >> 4) ; i++)
         {
             if( i >= (player->hitpoints & 0x0f) )
-                display_block(&GLYPHS[254*8], 0+i, 5);
+                display_block(&GLYPHS[104*8], 0+i, 5);
             else
-                display_block(&GLYPHS[255*8], 0+i, 5);
+                display_block(&GLYPHS[105*8], 0+i, 5);
         }
         
         /* Display opponent health */
         for(byte i=0 ; i<((opponent->hitpoints & 0xf0) >> 4) ; i++)
         {
             if( i >= (opponent->hitpoints & 0x0f) )
-                display_block(&GLYPHS[254*8], 15-i, 1);
+                display_block(&GLYPHS[104*8], 15-i, 1);
             else
-                display_block(&GLYPHS[255*8], 15-i, 1);
+                display_block(&GLYPHS[105*8], 15-i, 1);
         }
         
         if(opponent->dead || player->dead)
@@ -303,16 +303,12 @@ void battle_mode(mob_type *player, mob_type *opponent)
             break;
         }
         
-        word player_actions = 0;
-        word opponent_actions = 0;
-        
         byte p_action = 0;
         
         //choose opponent action(s)
         for(byte i=0 ; i<opponent->num_actions ; i++)
         {
-            opponent_actions |= ((opponent->tactics>>((turn%4)*2)) & 0x03) << (i*2);
-            display_block(&GLYPHS[238*8], 6+i, 2);
+            display_block(&GLYPHS[97*8], 6+i, 2);
         }
         
         // Clear player actions
@@ -324,19 +320,17 @@ void battle_mode(mob_type *player, mob_type *opponent)
         while(player_turn)
         {
             //byte a = display_item_window((point){.x=6, .y=6}, (byte[3]){239, 240, 241}, 3, 3, FALSE);
-			byte a = 255;
-			while(a == 255)
-				a = display_item_window((point){.x=6, .y=6}, &combat_actions[0], 3, 3);
-            display_block(&GLYPHS[(239+a)*8], p_action+6, 4);
-            player_actions |= (a+1) << (p_action*2);
+            byte a = 255;
+            while(a == 255)
+                a = display_item_window((point){.x=6, .y=6}, &combat_actions[0], 3, 3);
+            display_block(&GLYPHS[(98+a)*8], p_action+6, 4);
+            player->actions |= (a+1) << (p_action*3);
             p_action += 1;
             
             if (p_action == player->num_actions)
                 player_turn = FALSE;
-            
-            
-            if (p_action < player->num_actions)
-                display_block(&GLYPHS[237*8], 6+p_action, 4);
+            else
+                display_block(&GLYPHS[96*8], 6+p_action, 4);
         }
         
         //resolve combat
@@ -353,9 +347,9 @@ void battle_mode(mob_type *player, mob_type *opponent)
         byte o_attack_mod = 0;
         byte o_defence_mod = 0;
         
-        for(byte i=0 ; i<4 ; i++)
+        for(byte i=0 ; i<5 ; i++)
         {
-            byte pa = (player_actions >> (i*2)) & 0x0003;
+            byte pa = (player->actions >> (i*3)) & 0x0007;
             if (pa == 2)
                 p_defence_mod += 3;
             else if (pa == 3)
@@ -368,7 +362,7 @@ void battle_mode(mob_type *player, mob_type *opponent)
                     {
                         opponent->hitpoints = opponent->hitpoints & 0xf0;
                         opponent->dead = TRUE;
-                        opponent->glyph = 91;
+                        opponent->glyph = 20;
                         display_block_embiggened(opponent->glyph, (point){.x=13, .y=2});
                     }
                     else
@@ -377,28 +371,28 @@ void battle_mode(mob_type *player, mob_type *opponent)
             }
             
             
-            byte oa = (opponent_actions >> (i*2)) & 0x0003;
+            byte oa = (opponent->actions >> (i*3)) & 0x0007;
             if (oa == 2)
             {
                 o_defence_mod += 3;
-                display_block(&GLYPHS[240*8], 6+i, 2);
+                display_block(&GLYPHS[99*8], 6+i, 2);
             }
             else if (oa == 3)
             {
                 o_attack_mod += 3;
-                display_block(&GLYPHS[241*8], 6+i, 2);
+                display_block(&GLYPHS[100*8], 6+i, 2);
             }
             
             if (oa == 1)
             {
-                display_block(&GLYPHS[239*8], 6+i, 2);
+                display_block(&GLYPHS[98*8], 6+i, 2);
                 if ( (rng() % 20) + opponent->attack + o_attack_mod > player->defence + p_defence_mod)
                 {
                     if (opponent->damage >= (player->hitpoints & 0x0f))
                     {
                         player->hitpoints = player->hitpoints & 0xf0;
                         player->dead = TRUE;
-                        player->glyph = 91;
+                        player->glyph = 20;
                         display_block_embiggened(player->glyph, (point){.x=1, .y=6});
                     }
                     else
@@ -452,7 +446,7 @@ int main (void)
     build_location_portals();
     location *current_location = &village;
     
-    current_location->mobs[0] = &(mob_type){
+    /*current_location->mobs[0] = &(mob_type){
         .glyph = (PLAYER_OFFSET+7),   // Blob
         .position = {.x=10, .y=8},
     
@@ -462,10 +456,37 @@ int main (void)
         .defence = 5,
         .num_actions = 1,
         
-        .tactics = 0b01010101, // blobs just attack
+        .actions = 0b01010101, // blobs just attack
     
         .dead = FALSE,
+    };*/
+        
+    //mob_type mob1 = MOBS[BLOB];
+    current_location->mobs[0] = &BLOB; //&mob1; //MOBS[BLOB];
+    current_location->mobs[0]->position.x = 10;
+    current_location->mobs[0]->position.y = 8;
+    
+    //mob_type mob2 = MOBS[BLOB];
+    current_location->mobs[1] = &BLOB; //&mob2; //MOBS[BLOB];
+    current_location->mobs[1]->position.x = 11;
+    current_location->mobs[1]->position.y = 5;
+
+    //mob_type mob3 = MOBS[GNOME];
+    current_location->mobs[2] = &GNOME;
+    current_location->mobs[2]->position.x = 15;
+    current_location->mobs[2]->position.y = 1;
+        
+    current_location->containers[0] = &(container){
+        .glyph=54,
+        .position={.x=18, .y=6},
+        .items={CHICKEN_LEG},
     };
+    
+    //for(byte i=1 ; i<MAX_CONTAINERS ; i++)
+    //{
+    //    current_location->containers[i] = NULL_CONTAINER;
+   // }
+
     
     mob_type player = {
         .glyph = PLAYER_OFFSET,
@@ -477,14 +498,14 @@ int main (void)
         .damage = 2,
         .num_actions = 2,
         
-        .tactics = 0, // Not applicable to player
+        .actions = 0, // Not applicable to player
     
         .dead = FALSE,
     };
 	
-	item inventory[12];
+	//item inventory[12];
 	inventory[0] = APPLE;
-	inventory[1] = NULL_ITEM;
+	/*inventory[1] = NULL_ITEM;
 	inventory[2] = NULL_ITEM;
 	inventory[3] = NULL_ITEM;
 	inventory[4] = NULL_ITEM;
@@ -494,7 +515,9 @@ int main (void)
 	inventory[8] = NULL_ITEM;
 	inventory[9] = NULL_ITEM;
 	inventory[10] = NULL_ITEM;
-	inventory[11] = NULL_ITEM;
+	inventory[11] = NULL_ITEM;*/
+        
+    //container loot;
 	
     
     for(ever)
@@ -596,12 +619,12 @@ int main (void)
                                             CONTAINER_SIZE,
                                             4
                                            );
-										   
+                            
 							if (selected < 255)
 							{
 								for(byte slot=0 ; slot<12 ; slot++)
 								{
-									if (inventory[slot].glyph == 0)
+									if (inventory[slot].glyph == 0 && current_location->containers[i]->items[selected].glyph != 0)
 									{
 										inventory[slot] = current_location->containers[i]->items[selected];
 										current_location->containers[i]->items[selected] = NULL_ITEM;
@@ -638,9 +661,9 @@ int main (void)
                     for(byte i=0 ; i<((player.hitpoints & 0xf0) >> 4) ; i++)
                     {
                         if( i >= (player.hitpoints & 0x0f) )
-                            display_block(&GLYPHS[254*8], 5+i, 0);
+                            display_block(&GLYPHS[104*8], 5+i, 0);
                         else
-                            display_block(&GLYPHS[255*8], 5+i, 0);
+                            display_block(&GLYPHS[105*8], 5+i, 0);
                     }
                     
                     selected = display_item_window((point){.x=6, .y=2}, &inventory[0], 12, 4);
@@ -649,14 +672,13 @@ int main (void)
                         if (inventory[selected].attributes & CONSUMABLE)
                         {
                             //TODO: if I ever implement mana, need to check here
-                            if ((player.hitpoints & 0x0f) + (inventory[selected].attributes & 0x000f) > player.hitpoints >> 4)
-                                player.hitpoints = player.hitpoints & (player.hitpoints >> 4);
+                            if ((player.hitpoints & 0x0f) + (inventory[selected].attributes & HP) > player.hitpoints >> 4)
+                                player.hitpoints = (player.hitpoints & 0xf0) | (player.hitpoints >> 4);
                             else
-                                player.hitpoints += (inventory[selected].attributes & 0x000f);
+                                player.hitpoints += (inventory[selected].attributes & HP);
                             
                             inventory[selected] = NULL_ITEM;
                         }
-                        //use item if usable
                         click();
                     }
                 }
@@ -719,15 +741,15 @@ int main (void)
         if (player.dead)
         {
             display_window((point){5, 2}, 6, 4);
-            display_block_embiggened(91, (point){.x=7, .y=3});
-			
+            display_block_embiggened(20, (point){.x=7, .y=3});
+            
             for(ever) {}
         }
         
         mob_type *opponent = 0; //update_mobs(current_location, &player);
         for(byte i=0 ; i<MAX_MOBS ; i++)
         {
-            if (current_location->mobs[i])
+            if (current_location->mobs[i] != 0 && !current_location->mobs[i]->dead)
             {
                 //TODO: update the mob
                 
@@ -746,12 +768,64 @@ int main (void)
             }
         }
         
+        for(byte i=0 ; i<MAX_CONTAINERS ; i++)
+        {
+            if (current_location->containers[i] != 0 && 
+                current_location->containers[i]->position.x >= viewport_col && 
+                current_location->containers[i]->position.x < viewport_col+SCREEN_COLUMNS && 
+                current_location->containers[i]->position.y >= viewport_row && 
+                current_location->containers[i]->position.y < viewport_row+SCREEN_ROWS )
+            {
+                display_block(&GLYPHS[current_location->containers[i]->glyph*8], current_location->containers[i]->position.x-viewport_col, (current_location->containers[i]->position.y-viewport_row));
+                
+                if (current_location->containers[i]->glyph == 20)
+                {
+                    byte empty = TRUE;
+                    for (byte item=0 ; item<CONTAINER_SIZE ; item++)
+                    {
+                        if (current_location->containers[i]->items[item].glyph != 0)
+                            empty = FALSE;
+                    }
+                    if (empty)
+                        current_location->containers[i] = 0;
+                }
+            }
+        }
+        
         if (opponent != 0)// && !opponent->dead)
         {
             crap_beep(_A4, 20);
             delay_ms(10);
             crap_beep(_A5, 35);
             battle_mode(&player, opponent);
+            
+            for(byte i=0 ; i<MAX_CONTAINERS ; i++)
+            {
+                if (current_location->containers[i] == 0)
+                {
+                    crap_beep(_A4, 500);
+                    
+                    byte loot = rng() % 2;
+                    if (loot == 0)
+                    {
+                        current_location->containers[i] = &(container){
+                            .glyph=20,
+                            .position={.x=opponent->position.x, .y=opponent->position.y},
+                            .items={APPLE, },
+                        };
+                    }
+                    else if (loot == 1)
+                    {
+                        current_location->containers[i] = &(container){
+                            .glyph=20,
+                            .position={.x=opponent->position.x, .y=opponent->position.y},
+                            .items={CHICKEN_LEG, },
+                        };
+                    }
+
+                    break;
+                }
+            }
             
             map_dirty = TRUE;
         }

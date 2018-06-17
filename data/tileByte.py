@@ -46,7 +46,7 @@ for y in range(im.size[1]//8):
             if b == "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, ":
                 index = 0
             else:
-                index = glyphs.index(b) +128
+                index = glyphs.index(b) + 32
             tiles.append(index)
         except (ValueError):
             tiles.append(0)
