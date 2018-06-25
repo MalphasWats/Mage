@@ -11,18 +11,21 @@
 
 #define SPLASH_DELAY    1500
 #define BTN_DELAY       180
+#define SPAWN_DELAY     45000
 
 /* Button ADC Values */
-#define _UP     695 //688
+#define _UP     695
 #define _DOWN   852
 #define _LEFT   930
-#define _RIGHT  610 //678
+#define _RIGHT  608
 #define _A      512
-#define _B      322
-#define _C      255
-//#define _D      1021
+#define _B      320
+#define _C      252
+#define _AC     584
 
 #define ADC_VAR 2
+
+#define PLAYER_INVENTORY 12
 
         
 /*  0000  0      1000  8
@@ -50,7 +53,7 @@ static const byte LOGO[] PROGMEM = {
 };
 
 void display_map(location *loc);
-void display_hud(unsigned int value);
+//void display_hud(unsigned int value);
 //void display_player(mob_type *player);
 //mob_type *update_mobs(location *loc, mob_type *player);
 //void display_mobs(location *loc);

@@ -21,7 +21,7 @@
 #define SCREEN_COLUMNS 16
 #define SCREEN_ROWS    8
 
-#define SCREEN_RAM_OFFSET 2 //SH1106 //SSD1306 = 0
+#define SCREEN_RAM_OFFSET 0 //SH1106=2 //SSD1306 = 0
 
 static const byte BLANK[] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0};
 
