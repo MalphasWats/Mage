@@ -54,5 +54,5 @@ I wasn't happy with the layout - the screen overlapped awkwardly and the CR2023 
 make it any thinner or smaller than a Lipo, so I returned to the drawing board and produced a *Final Version*
 for which I am currently awaiting delivery.
 
-![Mage 3](references/board3.jpg)
+![Mage 3](references/board3.png)
 
