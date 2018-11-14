@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:ArchMage-cache
 EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
@@ -29,7 +30,7 @@ L Connector_Generic:Conn_02x04_Counter_Clockwise J2
 U 1 1 5BB3296C
 P 8150 3500
 F 0 "J2" H 8200 3817 50  0000 C CNN
-F 1 "Conn_02x04_Counter_Clockwise" H 8200 3726 50  0000 C CNN
+F 1 "DIP8" H 8200 3726 50  0000 C CNN
 F 2 "Housings_DIP:DIP-8_W7.62mm" H 8150 3500 50  0001 C CNN
 F 3 "~" H 8150 3500 50  0001 C CNN
 	1    8150 3500
@@ -74,17 +75,17 @@ Text GLabel 6300 3000 2    50   Input ~ 0
 PB1
 Text GLabel 6300 3100 2    50   Input ~ 0
 PB2
-Text GLabel 9300 2650 2    50   Input ~ 0
+Text GLabel 9450 3150 0    50   Input ~ 0
 SCK
-Text GLabel 9300 2550 2    50   Input ~ 0
+Text GLabel 9450 3050 0    50   Input ~ 0
 MISO
-Text GLabel 9300 2450 2    50   Input ~ 0
+Text GLabel 9950 3150 2    50   Input ~ 0
 MOSI
-Text GLabel 8800 2650 0    50   Input ~ 0
+Text GLabel 9950 3050 2    50   Input ~ 0
 Vcc
-Text GLabel 8800 2450 0    50   Input ~ 0
+Text GLabel 9950 3250 2    50   Input ~ 0
 GND
-Text GLabel 8800 2550 0    50   Input ~ 0
+Text GLabel 9450 3250 0    50   Input ~ 0
 RESET
 Text GLabel 8800 4000 2    50   Input ~ 0
 PB0
@@ -111,14 +112,14 @@ Wire Wire Line
 Wire Wire Line
 	8600 3700 8600 4000
 $Comp
-L Connector_Generic:Conn_02x03_Counter_Clockwise J1
-U 1 1 5BB33CA0
-P 9000 2550
-F 0 "J1" H 9050 2867 50  0000 C CNN
-F 1 "Conn_02x03_Counter_Clockwise" H 9050 2776 50  0000 C CNN
-F 2 "Connectors_JAE:JAE_LY20-06P-2T_2x03x2.00mm_Straight" H 9000 2550 50  0001 C CNN
-F 3 "~" H 9000 2550 50  0001 C CNN
-	1    9000 2550
+L Connector_Generic:Conn_02x03_Odd_Even J1
+U 1 1 5BE02E03
+P 9650 3150
+F 0 "J1" H 9700 3467 50  0000 C CNN
+F 1 "ISP" H 9700 3376 50  0000 C CNN
+F 2 "Pin_Headers:Pin_Header_Straight_2x03_Pitch2.54mm" H 9650 3150 50  0001 C CNN
+F 3 "~" H 9650 3150 50  0001 C CNN
+	1    9650 3150
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
